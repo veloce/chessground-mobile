@@ -2,9 +2,12 @@ var drag = require('./drag');
 var util = require('./util');
 var vdom = require('./vdom');
 
-var prevPiecesMap = {};
-var prevFadingsMap = {};
-var prevOrientation = '';
+// previous ui state for diffing and rendering changes
+var prevState = {
+  pieces: {},
+  fadings: {},
+  orientation: ''
+};
 
 function diffAndRenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
@@ -13,13 +16,13 @@ function diffAndRenderBoard(ctrl) {
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
-    prevPiece = prevPiecesMap[key];
+    prevPiece = prevState.pieces[key];
     fading = fadings && fadings[key];
-    prevFading = prevFadingsMap[key];
+    prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
     // square pos change if orientation change
     // TODO use vdom node update
-    if (prevOrientation !== ctrl.data.orientation) {
+    if (prevState.orientation !== ctrl.data.orientation) {
       var asWhite = ctrl.data.orientation === 'white';
       var pos = util.key2pos(key);
       var bpos = util.boardpos(pos, asWhite);
@@ -31,7 +34,7 @@ function diffAndRenderBoard(ctrl) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
       if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
     }
-    prevFadingsMap[key] = fading;
+    prevState.fadings[key] = fading;
     // there is a now piece at this square
     if (piece) {
       // a piece was already there
@@ -60,9 +63,9 @@ function diffAndRenderBoard(ctrl) {
         squareEl.removeChild(squareEl.firstChild);
       }
     }
-    prevPiecesMap[key] = piece;
+    prevState.pieces[key] = piece;
   }
-  prevOrientation = ctrl.data.orientation;
+  prevState.orientation = ctrl.data.orientation;
 }
 
 function pieceClass(p) {
@@ -85,7 +88,7 @@ function renderPiece(ctrl, key, p) {
     var animation = ctrl.data.animation.current.anims[key];
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   }
-  prevPiecesMap[key] = p;
+  prevState.pieces[key] = p;
   return {
     tag: 'div',
     attrs: attrs
@@ -170,7 +173,7 @@ function bindEvents(ctrl, el) {
 
 module.exports = function(ctrl) {
   var onresizeHandler;
-  prevOrientation = ctrl.data.orientation;
+  prevState.orientation = ctrl.data.orientation;
   return {
     tag: 'div',
     attrs: {
