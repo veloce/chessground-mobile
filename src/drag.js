@@ -107,11 +107,9 @@ function processDrag(data) {
           cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
           if (cur.over) {
             cur.prevTarget = cur.over;
-            squareTarget = vdom.append(document.getElementById('cg-board'),
-              renderSquareTarget(data, cur)).dom;
+            squareTarget = vdom.append(data.element, renderSquareTarget(data, cur)).dom;
           } else {
-            if (squareTarget)
-              document.getElementById('cg-board').removeChild(squareTarget);
+            if (squareTarget) data.element.removeChild(squareTarget);
             squareTarget = null;
           }
         }

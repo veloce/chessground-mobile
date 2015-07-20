@@ -160,6 +160,17 @@ function renderContent(ctrl) {
   return children;
 }
 
+function renderBoard(ctrl) {
+  return {
+    tag: 'div',
+    attrs: {
+      id: 'cg-board',
+      'class': 'cg-board'
+    },
+    children: renderContent(ctrl)
+  };
+}
+
 function bindEvents(ctrl, el) {
   var onstart = util.partial(drag.start, ctrl.data);
   var onmove = util.partial(drag.move, ctrl.data);
@@ -177,9 +188,8 @@ module.exports = function(ctrl) {
   return {
     tag: 'div',
     attrs: {
-      id: 'cg-board',
       'class': [
-        'cg-board',
+        'cg-board-wrap',
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
       ].join(' ')
@@ -189,7 +199,7 @@ module.exports = function(ctrl) {
         var boardEl = e.target;
         if (!ctrl.data.viewOnly) bindEvents(ctrl, boardEl);
         ctrl.data.bounds = boardEl.getBoundingClientRect();
-        ctrl.data.element = boardEl;
+        ctrl.data.element = document.getElementById('cg-board');
         ctrl.data.render = function() {
           console.log('render triggered');
           diffAndRenderBoard(ctrl);
@@ -206,6 +216,6 @@ module.exports = function(ctrl) {
         window.removeEventListener('resize', onresizeHandler);
       }
     },
-    children: renderContent(ctrl)
+    children: renderBoard(ctrl)
   };
 };
