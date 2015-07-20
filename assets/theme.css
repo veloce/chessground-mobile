@@ -1,40 +1,15 @@
 /*
  * Board
  */
-.blue .cg-board {
+.blue .cg-board-wrap {
   background-image: url('images/board/blue2.jpg');
 }
-.wood .cg-board {
+.wood .cg-board-wrap {
   background-image: url('images/board/wood2.jpg');
 }
-.marble .cg-board {
+.marble .cg-board-wrap {
   background-image: url('images/board/marble.jpg');
 }
-.chessground.light-wood-3d .cg-board-wrap {
-  position: relative;
-  background-image: url('images/board/3d/Light-Wood.png');
-  background-size: cover;
-}
-.chessground.small.light-wood-3d .cg-board-wrap {
-  width: calc(1400px / 4.6666);
-  height: calc(1310px / 4.6666);
-}
-.chessground.large.light-wood-3d .cg-board-wrap {
-  width: calc(1400px / 1);
-  height: calc(1310px / 1);
-}
-.light-wood-3d .cg-board {
-  position: absolute;
-  left: 0;
-  top: 0.6168702%;
-  width: 100%;
-  height: 97.0229%;
-}
-/*
-whole: 1400x1310
-useful: 1400x1271, 
-top: 8, bottom: 31
-
 
 /*
  * Pieces

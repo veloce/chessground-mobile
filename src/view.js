@@ -1,12 +1,16 @@
 var drag = require('./drag');
 var util = require('./util');
 var vdom = require('./vdom');
+var drawLights = require('./canvas');
 
 // previous ui state for diffing and rendering changes
 var prevState = {
   pieces: {},
   fadings: {},
-  orientation: ''
+  orientation: '',
+  selected: null,
+  check: null,
+  lastMove: null
 };
 
 function diffAndRenderBoard(ctrl) {
@@ -171,6 +175,24 @@ function renderBoard(ctrl) {
   };
 }
 
+function renderCanvas(bounds) {
+  return {
+    tag: 'canvas',
+    attrs: {
+      id: 'cg-lights',
+      width: bounds.width,
+      height: bounds.height,
+      style: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        opacity: 0.5,
+        'z-index': 1
+      }
+    }
+  };
+}
+
 function bindEvents(ctrl, el) {
   var onstart = util.partial(drag.start, ctrl.data);
   var onmove = util.partial(drag.move, ctrl.data);
@@ -200,9 +222,13 @@ module.exports = function(ctrl) {
         if (!ctrl.data.viewOnly) bindEvents(ctrl, boardEl);
         ctrl.data.bounds = boardEl.getBoundingClientRect();
         ctrl.data.element = document.getElementById('cg-board');
+        vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
+        drawLights(ctrl.data, prevState);
         ctrl.data.render = function() {
           console.log('render triggered');
           diffAndRenderBoard(ctrl);
+          drawLights(ctrl.data, prevState);
+          prevState.selected = ctrl.data.selected;
         };
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
