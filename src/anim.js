@@ -147,10 +147,7 @@ function animate(transformation, data) {
   };
   // clone pieces
   for (var key in data.pieces) {
-    prev.pieces[key] = {
-      role: data.pieces[key].role,
-      color: data.pieces[key].color
-    };
+    prev.pieces[key] = data.pieces[key];
   }
   var result = transformation();
   var plan = computePlan(prev, data);

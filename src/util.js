@@ -114,6 +114,5 @@ module.exports = {
   partialApply: partialApply,
   partial: partial,
   transformProp: transformProp,
-  requestAnimationFrame: (window.requestAnimationFrame || window.setTimeout).bind(window),
   isRightButton: isRightButton
 };

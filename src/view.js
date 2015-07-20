@@ -4,8 +4,9 @@ var vdom = require('./vdom');
 
 var prevPiecesMap = {};
 var prevFadingsMap = {};
+var prevOrientation = '';
 
-function diffAndRenderPieces(ctrl) {
+function diffAndRenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
   var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl;
@@ -16,6 +17,15 @@ function diffAndRenderPieces(ctrl) {
     fading = fadings && fadings[key];
     prevFading = prevFadingsMap[key];
     squareEl = document.getElementById('cgs-' + key);
+    // square pos change if orientation change
+    // TODO use vdom node update
+    if (prevOrientation !== ctrl.data.orientation) {
+      var asWhite = ctrl.data.orientation === 'white';
+      var pos = util.key2pos(key);
+      var bpos = util.boardpos(pos, asWhite);
+      squareEl.style.left = bpos.left + '%';
+      squareEl.style.bottom = bpos.bottom + '%';
+    }
     // remove previous fading if any when animation is finished
     if (!fading && prevFading) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
@@ -28,7 +38,6 @@ function diffAndRenderPieces(ctrl) {
       if (prevPiece) {
         // same piece same square: do nothing
         if (piece === prevPiece) {
-          continue;
         } // different pieces: remove old piece and put new one
         else {
           pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
@@ -53,6 +62,7 @@ function diffAndRenderPieces(ctrl) {
     }
     prevPiecesMap[key] = piece;
   }
+  prevOrientation = ctrl.data.orientation;
 }
 
 function pieceClass(p) {
@@ -96,30 +106,15 @@ function renderSquare(ctrl, pos, asWhite) {
   var rank = pos[1];
   var key = file + rank;
   var piece = ctrl.data.pieces[key];
-  var isDragOver = ctrl.data.highlight.dragOver && ctrl.data.draggable.current.over === key;
   var bpos = util.boardpos(pos, asWhite);
   var attrs = {
     id: 'cgs-' + key,
-    class: 'cg-square ' + key + ' ' + util.classSet({
-      'selected': ctrl.data.selected === key,
-      'check': ctrl.data.highlight.check && ctrl.data.check === key,
-      'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
-      'move-dest': (isDragOver || ctrl.data.movable.showDests) && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
-      'premove-dest': (isDragOver || ctrl.data.premovable.showDests) && util.containsX(ctrl.data.premovable.dests, key),
-      'current-premove': util.contains2(ctrl.data.premovable.current, key),
-      'drag-over': isDragOver,
-      'occupied': !!piece,
-      'exploding': ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1
-    }),
+    'class': 'cg-square ' + key,
     style: {
       left: bpos.left + '%',
       bottom: bpos.bottom + '%'
     }
   };
-  if (ctrl.data.coordinates) {
-    if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-x'] = file;
-    if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-y'] = rank;
-  }
   var children = [];
   if (piece) {
     children.push(renderPiece(ctrl, key, piece));
@@ -175,13 +170,13 @@ function bindEvents(ctrl, el) {
 
 module.exports = function(ctrl) {
   var onresizeHandler;
+  prevOrientation = ctrl.data.orientation;
   return {
     tag: 'div',
     attrs: {
       id: 'cg-board',
       'class': [
         'cg-board',
-        'orientation-' + ctrl.data.orientation,
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
       ].join(' ')
@@ -194,7 +189,7 @@ module.exports = function(ctrl) {
         ctrl.data.element = boardEl;
         ctrl.data.render = function() {
           console.log('render triggered');
-          diffAndRenderPieces(ctrl);
+          diffAndRenderBoard(ctrl);
         };
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
