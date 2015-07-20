@@ -1,4 +1,4 @@
-var m = require('mithril');
+var vdom = require('./vdom');
 var ctrl = require('./ctrl');
 var view = require('./view');
 var api = require('./api');
@@ -8,7 +8,7 @@ function init(element, config) {
 
   var controller = new ctrl(config);
 
-  m.render(element, view(controller));
+  vdom.append(element, view(controller));
 
   return api(controller);
 }

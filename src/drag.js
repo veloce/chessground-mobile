@@ -1,6 +1,7 @@
 var board = require('./board');
 var util = require('./util');
 var hold = require('./hold');
+var vdom = require('./vdom');
 
 var originTarget;
 
@@ -8,8 +9,30 @@ var originTarget;
 var draggingPiece;
 var squareTarget;
 
-function hashPiece(piece) {
-  return piece ? piece.color + ' ' + piece.role : '';
+function renderSquareTarget(data, cur) {
+  var pos = util.key2pos(cur.over),
+    width = cur.bounds.width,
+    targetWidth = width / 4,
+    squareWidth = width / 8,
+    asWhite = data.orientation === 'white';
+  var style = {
+    width: targetWidth + 'px',
+    height: targetWidth + 'px',
+    left: (-0.5 * squareWidth) + 'px',
+    top: (-0.5 * squareWidth) + 'px'
+  };
+  var vector = [
+    (asWhite ? pos[0] - 1 : 8 - pos[0]) * squareWidth,
+    (asWhite ? 8 - pos[1] : pos[1] - 1) * squareWidth
+  ];
+  style[util.transformProp()] = util.translate(vector);
+  return {
+    tag: 'div',
+    attrs: {
+      id: 'cg-square-target',
+      style: style
+    }
+  };
 }
 
 function fixDraggingPieceElementAfterDrag() {
@@ -40,7 +63,7 @@ function start(data, e) {
     data.draggable.current = {
       previouslySelected: previouslySelected,
       orig: orig,
-      piece: hashPiece(data.pieces[orig]),
+      piece: data.pieces[orig],
       rel: position,
       epos: position,
       pos: [0, 0],
@@ -54,8 +77,8 @@ function start(data, e) {
     draggingPiece = data.element.querySelector('.' + data.draggable.current.orig + ' > .cg-piece');
     hold.start();
   } else if (hadPremove) board.unsetPremove(data);
+  processDrag(data);
   data.renderRAF();
-  processDrag(data, e);
 }
 
 function processDrag(data) {
@@ -67,12 +90,11 @@ function processDrag(data) {
       data.animation.current.start = false;
 
     // if moving piece is gone, cancel
-    if (hashPiece(data.pieces[cur.orig]) !== cur.piece) cancel(data);
+    if (data.pieces[cur.orig] !== cur.piece) cancel(data);
     else {
       if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
-        // render once for ghost and dragging style
         cur.started = true;
-        data.renderRAF();
+        draggingPiece.classList.add('dragging');
       }
       if (cur.started) {
         cur.pos = [
@@ -85,11 +107,12 @@ function processDrag(data) {
           cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
           if (cur.over) {
             cur.prevTarget = cur.over;
-            data.render();
-            squareTarget = document.getElementById('cg-square-target');
+            squareTarget = vdom.append(document.getElementById('cg-board'),
+              renderSquareTarget(data, cur)).dom;
           } else {
+            if (squareTarget)
+              document.getElementById('cg-board').removeChild(squareTarget);
             squareTarget = null;
-            data.render();
           }
         }
         cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
@@ -122,7 +145,7 @@ function move(data, e) {
 
   if (data.draggable.current.orig) {
     data.draggable.current.epos = util.eventPosition(e);
-    processDrag(data, e);
+    processDrag(data);
   }
 }
 
@@ -144,7 +167,6 @@ function end(data, e) {
     board.setSelected(data, null);
   }
   draggable.current = {};
-  data.renderRAF();
 }
 
 function cancel(data) {

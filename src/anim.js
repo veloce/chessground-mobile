@@ -45,7 +45,7 @@ function computePlan(prev, current) {
     height = bounds.height / 8,
     anims = {},
     animedOrigs = [],
-    fadings = [],
+    fadings = {},
     missings = [],
     news = [],
     invert = prev.orientation !== current.orientation,
@@ -84,15 +84,10 @@ function computePlan(prev, current) {
   });
   missings.forEach(function(p) {
     if (p.key !== current.movable.dropped[0] && !util.containsX(animedOrigs, p.key)) {
-      fadings.push({
-        piece: {
-          role: p.role,
-          color: p.color
-        },
-        left: 12.5 * (white ? (p.pos[0] - 1) : (8 - p.pos[0])) + '%',
-        bottom: 12.5 * (white ? (p.pos[1] - 1) : (8 - p.pos[1])) + '%',
-        opacity: 1
-      });
+      fadings[p.key] = {
+        role: p.role,
+        color: p.color
+      };
     }
   });
 

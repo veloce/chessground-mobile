@@ -1,7 +1,59 @@
 var drag = require('./drag');
 var util = require('./util');
-var svg = require('./svg');
-var m = require('mithril');
+var vdom = require('./vdom');
+
+var prevPiecesMap = {};
+var prevFadingsMap = {};
+
+function diffAndRenderPieces(ctrl) {
+  var pieces = ctrl.data.pieces;
+  var fadings = ctrl.data.animation.current.fadings;
+  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl;
+  for (var i = 0, len = util.allKeys.length; i < len; i++) {
+    key = util.allKeys[i];
+    piece = pieces[key];
+    prevPiece = prevPiecesMap[key];
+    fading = fadings && fadings[key];
+    prevFading = prevFadingsMap[key];
+    squareEl = document.getElementById('cgs-' + key);
+    // remove previous fading if any when animation is finished
+    if (!fading && prevFading) {
+      var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
+      if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
+    }
+    prevFadingsMap[key] = fading;
+    // there is a now piece at this square
+    if (piece) {
+      // a piece was already there
+      if (prevPiece) {
+        // same piece same square: do nothing
+        if (piece === prevPiece) {
+          continue;
+        } // different pieces: remove old piece and put new one
+        else {
+          pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
+          squareEl.replaceChild(pieceEl, squareEl.firstChild);
+          // during an animation we render a temporary 'fading' piece (the name
+          // is wrong because it's not fading, it's juste here)
+          if (fading) {
+            vdom.append(squareEl, renderFading(fading));
+          }
+        }
+      } // empty square before: just put the piece
+      else {
+        pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
+        squareEl.appendChild(pieceEl);
+      }
+    } // no piece at this square
+    else {
+      // remove a piece that was here
+      if (prevPiece) {
+        squareEl.removeChild(squareEl.firstChild);
+      }
+    }
+    prevPiecesMap[key] = piece;
+  }
+}
 
 function pieceClass(p) {
   return ['cg-piece', p.role, p.color].join(' ');
@@ -10,7 +62,7 @@ function pieceClass(p) {
 function renderPiece(ctrl, key, p) {
   var attrs = {
     style: {},
-    class: pieceClass(p)
+    'class': pieceClass(p)
   };
   var draggable = ctrl.data.draggable.current;
   if (draggable.orig === key && (draggable.pos[0] !== 0 || draggable.pos[1] !== 0)) {
@@ -23,17 +75,18 @@ function renderPiece(ctrl, key, p) {
     var animation = ctrl.data.animation.current.anims[key];
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   }
+  prevPiecesMap[key] = p;
   return {
     tag: 'div',
     attrs: attrs
   };
 }
 
-function renderGhost(p) {
+function renderFading(p) {
   return {
     tag: 'div',
     attrs: {
-      class: pieceClass(p) + ' ghost'
+      'class': pieceClass(p) + ' fading'
     }
   };
 }
@@ -46,6 +99,7 @@ function renderSquare(ctrl, pos, asWhite) {
   var isDragOver = ctrl.data.highlight.dragOver && ctrl.data.draggable.current.over === key;
   var bpos = util.boardpos(pos, asWhite);
   var attrs = {
+    id: 'cgs-' + key,
     class: 'cg-square ' + key + ' ' + util.classSet({
       'selected': ctrl.data.selected === key,
       'check': ctrl.data.highlight.check && ctrl.data.check === key,
@@ -69,60 +123,11 @@ function renderSquare(ctrl, pos, asWhite) {
   var children = [];
   if (piece) {
     children.push(renderPiece(ctrl, key, piece));
-    if (ctrl.data.draggable.current.orig === key && ctrl.data.draggable.showGhost) {
-      children.push(renderGhost(piece));
-    }
   }
   return {
     tag: 'div',
     attrs: attrs,
     children: children
-  };
-}
-
-function renderSquareTarget(ctrl, cur) {
-  var pos = util.key2pos(cur.over),
-    width = cur.bounds.width,
-    targetWidth = width / 4,
-    squareWidth = width / 8,
-    asWhite = ctrl.data.orientation === 'white';
-  var style = {
-    width: targetWidth + 'px',
-    height: targetWidth + 'px',
-    left: (-0.5 * squareWidth) + 'px',
-    top: (-0.5 * squareWidth) + 'px'
-  };
-  var vector = [
-    (asWhite ? pos[0] - 1 : 8 - pos[0]) * squareWidth,
-    (asWhite ? 8 - pos[1] : pos[1] - 1) * squareWidth
-  ];
-  style[util.transformProp()] = util.translate(vector);
-  return {
-    tag: 'div',
-    attrs: {
-      id: 'cg-square-target',
-      style: style
-    }
-  };
-}
-
-function renderFading(cfg) {
-  return {
-    tag: 'div',
-    attrs: {
-      class: 'cg-square fading',
-      style: {
-        left: cfg.left,
-        bottom: cfg.bottom,
-        opacity: cfg.opacity
-      }
-    },
-    children: [{
-      tag: 'div',
-      attrs: {
-        class: pieceClass(cfg.piece)
-      }
-    }]
   };
 }
 
@@ -142,27 +147,6 @@ function renderMinimalDom(ctrl, asWhite) {
       }
     });
   });
-  var piecesKeys = Object.keys(ctrl.data.pieces);
-  for (var i = 0, len = piecesKeys.length; i < len; i++) {
-    var key = piecesKeys[i];
-    var pos = util.key2pos(key);
-    var bpos = util.boardpos(pos, asWhite);
-    var attrs = {
-      style: {
-        left: bpos.left + '%',
-        bottom: bpos.bottom + '%'
-      },
-      class: pieceClass(ctrl.data.pieces[key]) + ' ' + key
-    };
-    if (ctrl.data.animation.current.anims) {
-      var animation = ctrl.data.animation.current.anims[key];
-      if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
-    }
-    children.push({
-      tag: 'div',
-      attrs: attrs
-    });
-  }
 
   return children;
 }
@@ -175,102 +159,55 @@ function renderContent(ctrl) {
   for (var i = 0, len = positions.length; i < len; i++) {
     children.push(renderSquare(ctrl, positions[i], asWhite));
   }
-  if (ctrl.data.draggable.current.over && ctrl.data.draggable.squareTarget)
-    children.push(renderSquareTarget(ctrl, ctrl.data.draggable.current));
-  if (ctrl.data.animation.current.fadings)
-    ctrl.data.animation.current.fadings.forEach(function(p) {
-      children.push(renderFading(p));
-    });
-  if (ctrl.data.drawable.enabled) children.push(svg(ctrl));
   return children;
 }
 
-function bindEvents(ctrl, el, context) {
+function bindEvents(ctrl, el) {
   var onstart = util.partial(drag.start, ctrl.data);
   var onmove = util.partial(drag.move, ctrl.data);
   var onend = util.partial(drag.end, ctrl.data);
   var oncancel = util.partial(drag.cancel, ctrl.data);
-  var startEvents = ['touchstart', 'mousedown'];
-  var moveEvents = ['touchmove', 'mousemove'];
-  var endEvents = ['touchend', 'mouseup'];
-  startEvents.forEach(function(ev) {
-    el.addEventListener(ev, onstart);
-  });
-  moveEvents.forEach(function(ev) {
-    document.addEventListener(ev, onmove);
-  });
-  endEvents.forEach(function(ev) {
-    document.addEventListener(ev, onend);
-  });
-  document.addEventListener('touchcancel', oncancel);
-  context.onunload = function() {
-    startEvents.forEach(function(ev) {
-      el.removeEventListener(ev, onstart);
-    });
-    moveEvents.forEach(function(ev) {
-      document.removeEventListener(ev, onmove);
-    });
-    endEvents.forEach(function(ev) {
-      document.removeEventListener(ev, onend);
-    });
-    document.removeEventListener('touchcancel', oncancel);
-  };
-}
-
-function renderBoard(ctrl) {
-  return {
-    tag: 'div',
-    attrs: {
-      class: 'cg-board orientation-' + ctrl.data.orientation,
-      config: function(el, isUpdate, context) {
-        if (isUpdate) return;
-        if (!ctrl.data.viewOnly || ctrl.data.drawable.enabled)
-          bindEvents(ctrl, el, context);
-        // this function only repaints the board itself.
-        // it's called when dragging or animating pieces,
-        // to prevent the full application embedding chessground
-        // rendering on every animation frame
-        ctrl.data.render = function() {
-          m.render(el, renderContent(ctrl));
-        };
-        ctrl.data.renderRAF = function() {
-          util.requestAnimationFrame(ctrl.data.render);
-        };
-        ctrl.data.bounds = el.getBoundingClientRect();
-        ctrl.data.element = el;
-        ctrl.data.render();
-        var onresize = function() {
-          ctrl.data.bounds = el.getBoundingClientRect();
-        };
-        // intended for mobile only since resize calls are not debounced
-        window.addEventListener('resize', onresize);
-        context.onunload = function() {
-          window.removeEventListener('resize', onresize);
-        };
-      }
-    },
-    children: []
-  };
+  el.addEventListener('touchstart', onstart);
+  el.addEventListener('touchmove', onmove);
+  el.addEventListener('touchend', onend);
+  el.addEventListener('touchcancel', oncancel);
 }
 
 module.exports = function(ctrl) {
+  var onresizeHandler;
   return {
     tag: 'div',
     attrs: {
-      config: function(el, isUpdate) {
-        if (!isUpdate) el.addEventListener('contextmenu', function(e) {
-          if (ctrl.data.disableContextMenu || ctrl.data.drawable.enabled) {
-            e.preventDefault();
-            return false;
-          }
-        });
-      },
-      class: [
-        'cg-board-wrap',
+      id: 'cg-board',
+      'class': [
+        'cg-board',
+        'orientation-' + ctrl.data.orientation,
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
       ].join(' ')
     },
-    children: [renderBoard(ctrl)]
+    events: {
+      $created: function(e) {
+        var boardEl = e.target;
+        if (!ctrl.data.viewOnly) bindEvents(ctrl, boardEl);
+        ctrl.data.bounds = boardEl.getBoundingClientRect();
+        ctrl.data.element = boardEl;
+        ctrl.data.render = function() {
+          console.log('render triggered');
+          diffAndRenderPieces(ctrl);
+        };
+        ctrl.data.renderRAF = function() {
+          requestAnimationFrame(ctrl.data.render);
+        };
+        onresizeHandler = function() {
+          ctrl.data.bounds = boardEl.getBoundingClientRect();
+        };
+        window.addEventListener('resize', onresizeHandler);
+      },
+      $destroyed: function() {
+        window.removeEventListener('resize', onresizeHandler);
+      }
+    },
+    children: renderContent(ctrl)
   };
 };
