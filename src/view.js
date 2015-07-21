@@ -187,18 +187,23 @@ function renderBoard(ctrl) {
 }
 
 function renderCanvas(bounds) {
+  var style = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    'z-index': 1
+  };
+  // useful for old devices where canvas is not hardware accelerated thus not
+  // composited
+  style[util.transformProp()] = 'translateZ(0)';
+
   return {
     tag: 'canvas',
     attrs: {
       id: 'cg-lights',
       width: bounds.width,
       height: bounds.height,
-      style: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        'z-index': 1
-      }
+      style: style
     }
   };
 }
