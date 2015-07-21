@@ -60,6 +60,20 @@
         ground = window.ground = Chessground(document.getElementById('ground'), {
           draggable: {
             squareTarget: true
+          },
+          viewOnly: false,
+          turnColor: 'white',
+          animation: {
+            duration: 500
+          },
+          movable: {
+            free: false,
+            color: chessToColor(chess),
+            premove: true,
+            dests: chessToDests(chess),
+            events: {
+              after: onMove
+            }
           }
         });
       })();
