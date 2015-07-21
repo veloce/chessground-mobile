@@ -24,10 +24,22 @@ function drawSquare(pos, color, ctx) {
 
 function drawPossibleDest(pos, color, ctx) {
   ctx.fillStyle = color;
-  var circle = new Path2D();
   var r = pos.width * 0.16;
-  circle.arc(pos.x + pos.width / 2, pos.y + pos.width / 2, r, 0, Math.PI * 2, true);
-  ctx.fill(circle);
+  ctx.beginPath();
+  ctx.arc(pos.x + pos.width / 2, pos.y + pos.width / 2, r, 0, Math.PI * 2, true);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawPossibleDestOccupied(pos, color, ctx) {
+  var r = (pos.width / 2) * 1.15;
+  var x = pos.x + pos.width / 2;
+  var y = pos.y + pos.width / 2;
+  var gradient = ctx.createRadialGradient(x, y, r, x, y, 0);
+  gradient.addColorStop(0, color);
+  gradient.addColorStop(0.01, 'transparent');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
 }
 
 function drawCheck(pos, ctx) {
@@ -43,6 +55,7 @@ function drawCheck(pos, ctx) {
 }
 
 function drawLights(ctx, key, asWhite, data, prevState, isResize) {
+  var occupied = !!data.pieces[key];
   var isMoveDest = data.movable.showDests && util.containsX(data.movable.dests[data.selected], key);
   var wasMoveDest = data.movable.showDests && util.containsX(prevState.dests[prevState.selected], key);
   var isSelected = key === data.selected;
@@ -68,7 +81,10 @@ function drawLights(ctx, key, asWhite, data, prevState, isResize) {
     drawSquare(pos, 'rgba(216, 85, 0, 0.3)', ctx);
   }
   else if (isMoveDest) {
-    drawPossibleDest(pos, 'rgba(20,85,30,0.5)', ctx);
+    if (occupied)
+      drawPossibleDestOccupied(pos, 'rgba(20,85,30,0.5)', ctx);
+    else
+      drawPossibleDest(pos, 'rgba(20,85,30,0.5)', ctx);
   }
   else if (isLastMove) {
     drawSquare(pos, 'rgba(155, 199, 0, 0.4)', ctx);
@@ -77,7 +93,10 @@ function drawLights(ctx, key, asWhite, data, prevState, isResize) {
     drawSquare(pos, 'rgba(20, 30, 85, 0.5)', ctx);
   }
   else if (isPremoveDest) {
-    drawPossibleDest(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+    if (occupied)
+      drawPossibleDestOccupied(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+    else
+      drawPossibleDest(pos, 'rgba(20, 30, 85, 0.5)', ctx);
   }
   else if (isCheck) {
     drawCheck(pos, ctx);
