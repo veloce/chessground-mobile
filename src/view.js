@@ -3,18 +3,33 @@ var util = require('./util');
 var vdom = require('./vdom');
 var drawLights = require('./canvas');
 
-// previous ui state for diffing and rendering changes
-var prevState = {
-  pieces: {},
-  fadings: {},
-  orientation: '',
-  selected: null,
-  check: null,
-  lastMove: null,
-  dests: []
-};
+function savePrevData(data) {
+  var cloned = {
+    pieces: {},
+    fadings: {},
+    orientation: '',
+    selected: null,
+    check: null,
+    lastMove: null,
+    dests: []
+  };
+  var k;
+  for (k in data.pieces) {
+    cloned.pieces[k] = data.pieces[k];
+  }
+  for (k in data.animation.current.fadings) {
+    cloned.fadings[k] = data.animation.current.fadings;
+  }
+  cloned.dests = data.movable.dests;
+  cloned.selected = data.selected;
+  cloned.lastMove = data.lastMove;
+  cloned.check = data.check;
+  cloned.orientation = data.orientation;
 
-function diffAndRenderBoard(ctrl, isResize) {
+  return cloned;
+}
+
+function diffAndRenderBoard(ctrl, prevState, isResize) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
   var canvas = document.getElementById('cg-lights');
@@ -43,8 +58,6 @@ function diffAndRenderBoard(ctrl, isResize) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
       if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
     }
-    // save prev fadings
-    prevState.fadings[key] = fading;
     // there is a now piece at this square
     if (piece) {
       // a piece was already there
@@ -74,13 +87,7 @@ function diffAndRenderBoard(ctrl, isResize) {
         squareEl.removeChild(squareEl.firstChild);
       }
     }
-    prevState.pieces[key] = piece;
   }
-  prevState.dests = ctrl.data.movable.dests;
-  prevState.selected = ctrl.data.selected;
-  prevState.lastMove = ctrl.data.lastMove;
-  prevState.check = ctrl.data.check;
-  prevState.orientation = ctrl.data.orientation;
 }
 
 function pieceClass(p) {
@@ -103,7 +110,6 @@ function renderPiece(ctrl, key, p) {
     var animation = ctrl.data.animation.current.anims[key];
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   }
-  prevState.pieces[key] = p;
   return {
     tag: 'div',
     attrs: attrs
@@ -221,7 +227,6 @@ function bindEvents(ctrl, el) {
 
 module.exports = function(ctrl) {
   var onresizeHandler;
-  prevState.orientation = ctrl.data.orientation;
   return {
     tag: 'div',
     attrs: {
@@ -234,15 +239,17 @@ module.exports = function(ctrl) {
     events: {
       $created: function(e) {
         var boardEl = e.target;
+        // previous ui state for diffing and rendering changes
+        var prevState;
+
         if (!ctrl.data.viewOnly) bindEvents(ctrl, boardEl);
         ctrl.data.bounds = boardEl.getBoundingClientRect();
         ctrl.data.element = document.getElementById('cg-board');
         vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
         ctrl.data.render = function(isResize) {
-          console.log('render triggered');
-          diffAndRenderBoard(ctrl, isResize);
+          diffAndRenderBoard(ctrl, prevState, isResize);
+          prevState = savePrevData(ctrl.data);
         };
-        ctrl.data.render();
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
         };
@@ -251,6 +258,9 @@ module.exports = function(ctrl) {
           ctrl.data.render(true);
         };
         window.addEventListener('resize', onresizeHandler);
+        // render once
+        prevState = savePrevData(ctrl.data);
+        ctrl.data.render();
       },
       $destroyed: function() {
         window.removeEventListener('resize', onresizeHandler);
