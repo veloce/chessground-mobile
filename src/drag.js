@@ -165,6 +165,7 @@ function end(data, e) {
     board.setSelected(data, null);
   }
   draggable.current = {};
+  data.renderRAF();
 }
 
 function cancel(data) {

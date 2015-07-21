@@ -10,12 +10,16 @@ var prevState = {
   orientation: '',
   selected: null,
   check: null,
-  lastMove: null
+  lastMove: null,
+  dests: []
 };
 
-function diffAndRenderBoard(ctrl) {
+function diffAndRenderBoard(ctrl, isResize) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
+  var canvas = document.getElementById('cg-lights');
+  var ctx = canvas.getContext('2d');
+  var asWhite = ctrl.data.orientation === 'white';
   var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
@@ -27,17 +31,19 @@ function diffAndRenderBoard(ctrl) {
     // square pos change if orientation change
     // TODO use vdom node update
     if (prevState.orientation !== ctrl.data.orientation) {
-      var asWhite = ctrl.data.orientation === 'white';
       var pos = util.key2pos(key);
       var bpos = util.boardpos(pos, asWhite);
       squareEl.style.left = bpos.left + '%';
       squareEl.style.bottom = bpos.bottom + '%';
     }
+    // draw highlights
+    drawLights(ctx, key, asWhite, ctrl.data, prevState, isResize);
     // remove previous fading if any when animation is finished
     if (!fading && prevFading) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
       if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
     }
+    // save prev fadings
     prevState.fadings[key] = fading;
     // there is a now piece at this square
     if (piece) {
@@ -45,6 +51,7 @@ function diffAndRenderBoard(ctrl) {
       if (prevPiece) {
         // same piece same square: do nothing
         if (piece === prevPiece) {
+          continue;
         } // different pieces: remove old piece and put new one
         else {
           pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
@@ -69,6 +76,10 @@ function diffAndRenderBoard(ctrl) {
     }
     prevState.pieces[key] = piece;
   }
+  prevState.dests = ctrl.data.movable.dests;
+  prevState.selected = ctrl.data.selected;
+  prevState.lastMove = ctrl.data.lastMove;
+  prevState.check = ctrl.data.check;
   prevState.orientation = ctrl.data.orientation;
 }
 
@@ -186,7 +197,6 @@ function renderCanvas(bounds) {
         position: 'absolute',
         top: 0,
         left: 0,
-        opacity: 0.5,
         'z-index': 1
       }
     }
@@ -223,18 +233,17 @@ module.exports = function(ctrl) {
         ctrl.data.bounds = boardEl.getBoundingClientRect();
         ctrl.data.element = document.getElementById('cg-board');
         vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
-        drawLights(ctrl.data, prevState);
-        ctrl.data.render = function() {
+        ctrl.data.render = function(isResize) {
           console.log('render triggered');
-          diffAndRenderBoard(ctrl);
-          drawLights(ctrl.data, prevState);
-          prevState.selected = ctrl.data.selected;
+          diffAndRenderBoard(ctrl, isResize);
         };
+        ctrl.data.render();
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
         };
         onresizeHandler = function() {
           ctrl.data.bounds = boardEl.getBoundingClientRect();
+          ctrl.data.render(true);
         };
         window.addEventListener('resize', onresizeHandler);
       },

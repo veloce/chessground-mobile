@@ -58,8 +58,22 @@
           console.log(ground.getFen());
         };
         ground = window.ground = Chessground(document.getElementById('ground'), {
+          viewOnly: false,
+          turnColor: 'white',
+          animation: {
+            duration: 500
+          },
           draggable: {
             squareTarget: true
+          },
+          movable: {
+            free: false,
+            color: chessToColor(chess),
+            premove: true,
+            dests: chessToDests(chess),
+            events: {
+              after: onMove
+            }
           }
         });
       })();
