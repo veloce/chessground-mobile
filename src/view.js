@@ -11,7 +11,9 @@ function savePrevData(data) {
     selected: null,
     check: null,
     lastMove: null,
-    dests: []
+    dests: [],
+    premove: null,
+    premoveDests: []
   };
   var k;
   for (k in data.pieces) {
@@ -25,6 +27,8 @@ function savePrevData(data) {
   cloned.lastMove = data.lastMove;
   cloned.check = data.check;
   cloned.orientation = data.orientation;
+  cloned.premove = data.premovable.current;
+  cloned.premoveDests = data.premovable.dests;
 
   return cloned;
 }

@@ -22,8 +22,8 @@ function drawSquare(pos, color, ctx) {
   ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
 }
 
-function drawPossibleDest(pos, ctx) {
-  ctx.fillStyle = 'rgba(20,85,30,0.5)';
+function drawPossibleDest(pos, color, ctx) {
+  ctx.fillStyle = color;
   var circle = new Path2D();
   var r = pos.width * 0.16;
   circle.arc(pos.x + pos.width / 2, pos.y + pos.width / 2, r, 0, Math.PI * 2, true);
@@ -51,25 +51,35 @@ function drawLights(ctx, key, asWhite, data, prevState, isResize) {
   var wasLastMove = data.highlight.lastMove && util.contains2(prevState.lastMove, key);
   var isCheck = data.highlight.check && data.check === key;
   var wasCheck = data.highlight.check && prevState.check === key;
+  var isPremove = util.contains2(data.premovable.current, key);
+  var wasPremove = util.contains2(prevState.premove, key);
+  var isPremoveDest = data.premovable.showDests && util.containsX(data.premovable.dests, key);
+  var wasPremoveDest = data.premovable.showDests && util.containsX(prevState.premoveDests, key);
 
   var pos = squarePos(key, data.bounds, asWhite);
 
   // clear any prev state
-  if (wasSelected || wasMoveDest || wasLastMove || wasCheck || isResize) {
+  if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
+    wasPremoveDest || isResize) {
     clearSquare(pos, ctx);
   }
 
-  // highlight
   if (isSelected) {
     drawSquare(pos, 'rgba(216, 85, 0, 0.3)', ctx);
   }
   else if (isMoveDest) {
-    drawPossibleDest(pos, ctx);
+    drawPossibleDest(pos, 'rgba(20,85,30,0.5)', ctx);
   }
   else if (isLastMove) {
     drawSquare(pos, 'rgba(155, 199, 0, 0.4)', ctx);
   }
-  if (isCheck) {
+  else if (isPremove) {
+    drawSquare(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+  }
+  else if (isPremoveDest) {
+    drawPossibleDest(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+  }
+  else if (isCheck) {
     drawCheck(pos, ctx);
   }
 }
