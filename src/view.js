@@ -226,7 +226,7 @@ function renderMinimalDom(ctrl, asWhite) {
     children.push({
       tag: 'div',
       attrs: {
-        class: 'cg-square last-move',
+        'class': 'cg-square last-move',
         style: {
           left: bpos.left + '%',
           bottom: bpos.bottom + '%'
@@ -234,6 +234,22 @@ function renderMinimalDom(ctrl, asWhite) {
       }
     });
   });
+  var piecesKeys = Object.keys(ctrl.data.pieces);
+  for (var i = 0, len = piecesKeys.length; i < len; i++) {
+    var key = piecesKeys[i];
+    var pos = util.key2pos(key);
+    var attrs = {
+      style: {
+        left: (asWhite ? pos[0] - 1 : 8 - pos[0]) * 12.5 + '%',
+        bottom: (asWhite ? pos[1] - 1 : 8 - pos[1]) * 12.5 + '%'
+      },
+      'class': pieceClass(ctrl.data.pieces[key])
+    };
+    children.push({
+      tag: 'div',
+      attrs: attrs
+    });
+  }
 
   return children;
 }
