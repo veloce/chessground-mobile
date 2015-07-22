@@ -1,14 +1,13 @@
 {
-  "name": "chessground",
-  "version": "2.1.0",
-  "description": "lichess.org Chess UI",
+  "name": "chessground-mobile",
+  "version": "3.0.0",
+  "description": "lichess.org mobile application chess UI",
   "main": "src/main.js",
   "directories": {
     "example": "examples"
   },
   "dependencies": {
-    "merge": "1.2.0",
-    "mithril": "0.2.0"
+    "merge": "1.2.0"
   },
   "devDependencies": {
     "browserify": "~9.0.8",
@@ -21,18 +20,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/ornicar/chessground.git"
+    "url": "git://github.com/veloce/chessground-mobile.git"
   },
   "keywords": [
     "chess",
     "lichess.org",
     "chessboard",
-    "UI"
+    "UI",
+    "mobile"
   ],
-  "author": "Thibault Duplessis (https://github.com/ornicar)",
+  "author": "Thibault Duplessis (https://github.com/ornicar), Vincent Velociter (https://github.com/veloce)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ornicar/chessground/issues"
+    "url": "https://github.com/veloce/chessground-mobile/issues"
   },
-  "homepage": "https://github.com/ornicar/chessground"
+  "homepage": "https://github.com/veloce/chessground-mobile"
 }
