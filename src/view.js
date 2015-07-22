@@ -306,8 +306,8 @@ module.exports = function(ctrl) {
         ctrl.data.bounds = boardEl.getBoundingClientRect();
         ctrl.data.element = document.getElementById('cg-board');
         vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
-        ctrl.data.render = function(isResize) {
-          diffAndRenderBoard(ctrl, prevState, isResize);
+        ctrl.data.render = function(resizeFlag) {
+          diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
           prevState = savePrevData(ctrl);
         };
         ctrl.data.renderRAF = function() {
@@ -315,7 +315,7 @@ module.exports = function(ctrl) {
         };
         onresizeHandler = function() {
           ctrl.data.bounds = boardEl.getBoundingClientRect();
-          ctrl.data.render(true);
+          ctrl.data.render('resize');
         };
         window.addEventListener('resize', onresizeHandler);
         // render once
