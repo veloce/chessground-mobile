@@ -1,7 +1,7 @@
 var drag = require('./drag');
 var util = require('./util');
 var vdom = require('./vdom');
-var drawLights = require('./canvas');
+var canvasAPI = require('./canvas');
 
 function savePrevData(data) {
   var cloned = {
@@ -91,6 +91,55 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
         squareEl.removeChild(squareEl.firstChild);
       }
     }
+  }
+}
+
+function drawLights(ctx, key, asWhite, data, prevState, isResize) {
+  var occupied = !!data.pieces[key];
+  var isMoveDest = data.movable.showDests && util.containsX(data.movable.dests[data.selected], key);
+  var wasMoveDest = data.movable.showDests && util.containsX(prevState.dests[prevState.selected], key);
+  var isSelected = key === data.selected;
+  var wasSelected = key === prevState.selected;
+  var isLastMove = data.highlight.lastMove && util.contains2(data.lastMove, key);
+  var wasLastMove = data.highlight.lastMove && util.contains2(prevState.lastMove, key);
+  var isCheck = data.highlight.check && data.check === key;
+  var wasCheck = data.highlight.check && prevState.check === key;
+  var isPremove = util.contains2(data.premovable.current, key);
+  var wasPremove = util.contains2(prevState.premove, key);
+  var isPremoveDest = data.premovable.showDests && util.containsX(data.premovable.dests, key);
+  var wasPremoveDest = data.premovable.showDests && util.containsX(prevState.premoveDests, key);
+
+  var pos = canvasAPI.squarePos(key, data.bounds, asWhite);
+
+  // clear any prev state
+  if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
+    wasPremoveDest || isResize) {
+    canvasAPI.clearSquare(pos, ctx);
+  }
+
+  if (isSelected) {
+    canvasAPI.drawSquare(pos, 'rgba(216, 85, 0, 0.3)', ctx);
+  }
+  else if (isMoveDest) {
+    if (occupied)
+      canvasAPI.drawPossibleDestOccupied(pos, 'rgba(20,85,30,0.5)', ctx);
+    else
+      canvasAPI.drawPossibleDest(pos, 'rgba(20,85,30,0.5)', ctx);
+  }
+  else if (isLastMove) {
+    canvasAPI.drawSquare(pos, 'rgba(155, 199, 0, 0.4)', ctx);
+  }
+  else if (isPremove) {
+    canvasAPI.drawSquare(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+  }
+  else if (isPremoveDest) {
+    if (occupied)
+      canvasAPI.drawPossibleDestOccupied(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+    else
+      canvasAPI.drawPossibleDest(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+  }
+  else if (isCheck) {
+    canvasAPI.drawCheck(pos, ctx);
   }
 }
 
