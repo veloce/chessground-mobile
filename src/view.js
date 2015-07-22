@@ -114,40 +114,47 @@ function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
   var isExploding = ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1;
   var wasExploding = prevState.exploding && prevState.exploding.indexOf(key) !== -1;
 
-  var pos = canvasAPI.squarePos(key, data.bounds, asWhite);
+  var pos;
 
-  // clear any prev state
+  // clear any prev light
   if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
     wasPremoveDest || wasExploding || isResize) {
+    pos = canvasAPI.squarePos(key, data.bounds, asWhite);
     canvasAPI.clearSquare(pos, ctx);
   }
 
-  if (isSelected) {
-    canvasAPI.drawSquare(pos, data.colors.selected, ctx);
-  }
-  else if (isMoveDest) {
-    if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, data.colors.moveDest, ctx);
-    else
-      canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
-  }
-  else if (isLastMove) {
-    canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
-  }
-  else if (isPremove) {
-    canvasAPI.drawSquare(pos, data.colors.premove, ctx);
-  }
-  else if (isPremoveDest) {
-    if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
-    else
-      canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
-  }
-  else if (isCheck) {
-    canvasAPI.drawCheck(pos, data.colors.check, ctx);
-  }
-  if (isExploding) {
-    canvasAPI.drawSquare(pos, data.colors.exploding, ctx);
+  // draw new light
+  if (isSelected || isMoveDest || isLastMove || isPremove || isPremoveDest ||
+    isCheck || isExploding) {
+    pos = pos || canvasAPI.squarePos(key, data.bounds, asWhite);
+
+    if (isSelected) {
+      canvasAPI.drawSquare(pos, data.colors.selected, ctx);
+    }
+    else if (isMoveDest) {
+      if (occupied)
+        canvasAPI.drawPossibleDestOccupied(pos, data.colors.moveDest, ctx);
+      else
+        canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
+    }
+    else if (isLastMove) {
+      canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
+    }
+    else if (isPremove) {
+      canvasAPI.drawSquare(pos, data.colors.premove, ctx);
+    }
+    else if (isPremoveDest) {
+      if (occupied)
+        canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
+      else
+        canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
+    }
+    else if (isCheck) {
+      canvasAPI.drawCheck(pos, data.colors.check, ctx);
+    }
+    if (isExploding) {
+      canvasAPI.drawSquare(pos, data.colors.exploding, ctx);
+    }
   }
 }
 
@@ -308,7 +315,9 @@ module.exports = function(ctrl) {
         ctrl.data.element = document.getElementById('cg-board');
         vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
         ctrl.data.render = function(resizeFlag) {
+          // console.time('diff');
           diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
+          // console.timeEnd('diff');
           prevState = savePrevData(ctrl);
         };
         ctrl.data.renderRAF = function() {
