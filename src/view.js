@@ -118,28 +118,28 @@ function drawLights(ctx, key, asWhite, data, prevState, isResize) {
   }
 
   if (isSelected) {
-    canvasAPI.drawSquare(pos, 'rgba(216, 85, 0, 0.3)', ctx);
+    canvasAPI.drawSquare(pos, data.colors.selected, ctx);
   }
   else if (isMoveDest) {
     if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, 'rgba(20,85,30,0.5)', ctx);
+      canvasAPI.drawPossibleDestOccupied(pos, data.colors.moveDest, ctx);
     else
-      canvasAPI.drawPossibleDest(pos, 'rgba(20,85,30,0.5)', ctx);
+      canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
   }
   else if (isLastMove) {
-    canvasAPI.drawSquare(pos, 'rgba(155, 199, 0, 0.4)', ctx);
+    canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
   }
   else if (isPremove) {
-    canvasAPI.drawSquare(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+    canvasAPI.drawSquare(pos, data.colors.premove, ctx);
   }
   else if (isPremoveDest) {
     if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+      canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
     else
-      canvasAPI.drawPossibleDest(pos, 'rgba(20, 30, 85, 0.5)', ctx);
+      canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
   }
   else if (isCheck) {
-    canvasAPI.drawCheck(pos, ctx);
+    canvasAPI.drawCheck(pos, data.colors.check, ctx);
   }
 }
 

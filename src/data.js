@@ -97,6 +97,14 @@ module.exports = function(cfg) {
       move: function(orig, dest, capturedPiece) {},
       capture: function(key, piece) {}, // DEPRECATED called when a piece has been captured
       select: function(key) {} // called when a square is selected
+    },
+    colors: {
+      selected: 'rgba(216, 85, 0, 0.3)',
+      moveDest: 'rgba(20,85,30,0.4)',
+      lastMove: 'rgba(155, 199, 0, 0.3)',
+      premove: 'rgba(20, 30, 85, 0.3)',
+      premoveDest: 'rgba(20, 30, 85, 0.4)',
+      check: 'red'
     }
   };
 
