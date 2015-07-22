@@ -3,7 +3,7 @@ var util = require('./util');
 var vdom = require('./vdom');
 var canvasAPI = require('./canvas');
 
-function savePrevData(data) {
+function savePrevData(ctrl) {
   var cloned = {
     pieces: {},
     fadings: {},
@@ -13,22 +13,24 @@ function savePrevData(data) {
     lastMove: null,
     dests: [],
     premove: null,
-    premoveDests: []
+    premoveDests: [],
+    exploding: []
   };
   var k;
-  for (k in data.pieces) {
-    cloned.pieces[k] = data.pieces[k];
+  for (k in ctrl.data.pieces) {
+    cloned.pieces[k] = ctrl.data.pieces[k];
   }
-  for (k in data.animation.current.fadings) {
-    cloned.fadings[k] = data.animation.current.fadings;
+  for (k in ctrl.data.animation.current.fadings) {
+    cloned.fadings[k] = ctrl.data.animation.current.fadings;
   }
-  cloned.dests = data.movable.dests;
-  cloned.selected = data.selected;
-  cloned.lastMove = data.lastMove;
-  cloned.check = data.check;
-  cloned.orientation = data.orientation;
-  cloned.premove = data.premovable.current;
-  cloned.premoveDests = data.premovable.dests;
+  cloned.dests = ctrl.data.movable.dests;
+  cloned.selected = ctrl.data.selected;
+  cloned.lastMove = ctrl.data.lastMove;
+  cloned.check = ctrl.data.check;
+  cloned.orientation = ctrl.data.orientation;
+  cloned.premove = ctrl.data.premovable.current;
+  cloned.premoveDests = ctrl.data.premovable.dests;
+  cloned.exploding = ctrl.vm.exploding;
 
   return cloned;
 }
@@ -56,7 +58,7 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
       squareEl.style.bottom = bpos.bottom + '%';
     }
     // draw highlights
-    drawLights(ctx, key, asWhite, ctrl.data, prevState, isResize);
+    drawLights(ctx, key, asWhite, ctrl, prevState, isResize);
     // remove previous fading if any when animation is finished
     if (!fading && prevFading) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
@@ -94,52 +96,57 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
   }
 }
 
-function drawLights(ctx, key, asWhite, data, prevState, isResize) {
-  var occupied = !!data.pieces[key];
-  var isMoveDest = data.movable.showDests && util.containsX(data.movable.dests[data.selected], key);
-  var wasMoveDest = data.movable.showDests && util.containsX(prevState.dests[prevState.selected], key);
-  var isSelected = key === data.selected;
+function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
+  var occupied = !!ctrl.data.pieces[key];
+  var isMoveDest = ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key);
+  var wasMoveDest = ctrl.data.movable.showDests && util.containsX(prevState.dests[prevState.selected], key);
+  var isSelected = key === ctrl.data.selected;
   var wasSelected = key === prevState.selected;
-  var isLastMove = data.highlight.lastMove && util.contains2(data.lastMove, key);
-  var wasLastMove = data.highlight.lastMove && util.contains2(prevState.lastMove, key);
-  var isCheck = data.highlight.check && data.check === key;
-  var wasCheck = data.highlight.check && prevState.check === key;
-  var isPremove = util.contains2(data.premovable.current, key);
+  var isLastMove = ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key);
+  var wasLastMove = ctrl.data.highlight.lastMove && util.contains2(prevState.lastMove, key);
+  var isCheck = ctrl.data.highlight.check && ctrl.data.check === key;
+  var wasCheck = ctrl.data.highlight.check && prevState.check === key;
+  var isPremove = util.contains2(ctrl.data.premovable.current, key);
   var wasPremove = util.contains2(prevState.premove, key);
-  var isPremoveDest = data.premovable.showDests && util.containsX(data.premovable.dests, key);
-  var wasPremoveDest = data.premovable.showDests && util.containsX(prevState.premoveDests, key);
+  var isPremoveDest = ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key);
+  var wasPremoveDest = ctrl.data.premovable.showDests && util.containsX(prevState.premoveDests, key);
+  var isExploding = ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1;
+  var wasExploding = prevState.exploding && prevState.exploding.indexOf(key) !== -1;
 
-  var pos = canvasAPI.squarePos(key, data.bounds, asWhite);
+  var pos = canvasAPI.squarePos(key, ctrl.data.bounds, asWhite);
 
   // clear any prev state
   if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
-    wasPremoveDest || isResize) {
+    wasPremoveDest || wasExploding || isResize) {
     canvasAPI.clearSquare(pos, ctx);
   }
 
   if (isSelected) {
-    canvasAPI.drawSquare(pos, data.colors.selected, ctx);
+    canvasAPI.drawSquare(pos, ctrl.data.colors.selected, ctx);
   }
   else if (isMoveDest) {
     if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, data.colors.moveDest, ctx);
+      canvasAPI.drawPossibleDestOccupied(pos, ctrl.data.colors.moveDest, ctx);
     else
-      canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
+      canvasAPI.drawPossibleDest(pos, ctrl.data.colors.moveDest, ctx);
   }
   else if (isLastMove) {
-    canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
+    canvasAPI.drawSquare(pos, ctrl.data.colors.lastMove, ctx);
   }
   else if (isPremove) {
-    canvasAPI.drawSquare(pos, data.colors.premove, ctx);
+    canvasAPI.drawSquare(pos, ctrl.data.colors.premove, ctx);
   }
   else if (isPremoveDest) {
     if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
+      canvasAPI.drawPossibleDestOccupied(pos, ctrl.data.colors.premoveDest, ctx);
     else
-      canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
+      canvasAPI.drawPossibleDest(pos, ctrl.data.colors.premoveDest, ctx);
   }
   else if (isCheck) {
-    canvasAPI.drawCheck(pos, data.colors.check, ctx);
+    canvasAPI.drawCheck(pos, ctrl.data.colors.check, ctx);
+  }
+  if (isExploding) {
+    canvasAPI.drawSquare(pos, ctrl.data.colors.exploding, ctx);
   }
 }
 
@@ -301,7 +308,7 @@ module.exports = function(ctrl) {
         vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
         ctrl.data.render = function(isResize) {
           diffAndRenderBoard(ctrl, prevState, isResize);
-          prevState = savePrevData(ctrl.data);
+          prevState = savePrevData(ctrl);
         };
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
@@ -312,7 +319,7 @@ module.exports = function(ctrl) {
         };
         window.addEventListener('resize', onresizeHandler);
         // render once
-        prevState = savePrevData(ctrl.data);
+        prevState = savePrevData(ctrl);
         ctrl.data.render();
       },
       $destroyed: function() {
