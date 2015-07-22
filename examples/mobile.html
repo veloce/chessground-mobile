@@ -9,12 +9,12 @@
     <link rel="stylesheet" href="../assets/theme.css">
     <link rel="stylesheet" href="example.css">
     <style>
-      #ground {
+      .chessground {
         width: 100vw;
         height: 100vw;
       }
       @media (orientation: landscape) {
-        #ground {
+        .chessground {
           width: calc(100vh - 30px);
           height: calc(100vh - 30px);
         }
@@ -39,8 +39,7 @@
       }
     </script>
 
-    <!-- <div class="chessground wood small merida" id="ground1"></div> -->
-    <div class="wood merida coordinates" id="ground"></div>
+    <div class="chessground wood merida coordinates" id="ground"></div>
     <script>
       (function() {
         var ground;
@@ -74,6 +73,19 @@
               after: onMove
             }
           }
+        });
+      })();
+    </script>
+
+    <br />
+    <br />
+
+    <div class="chessground blue small merida" id="ground1"></div>
+    <script>
+      (function() {
+        var ground1 = window.ground1 = Chessground(document.getElementById('ground1'), {
+          viewOnly: true,
+          minimalDom: true
         });
       })();
     </script>

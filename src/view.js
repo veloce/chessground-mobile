@@ -238,10 +238,11 @@ function renderMinimalDom(ctrl, asWhite) {
   for (var i = 0, len = piecesKeys.length; i < len; i++) {
     var key = piecesKeys[i];
     var pos = util.key2pos(key);
+    var bpos = util.boardpos(pos, asWhite);
     var attrs = {
       style: {
-        left: (asWhite ? pos[0] - 1 : 8 - pos[0]) * 12.5 + '%',
-        bottom: (asWhite ? pos[1] - 1 : 8 - pos[1]) * 12.5 + '%'
+        left: bpos.left + '%',
+        bottom: bpos.bottom + '%'
       },
       'class': pieceClass(ctrl.data.pieces[key])
     };
@@ -270,7 +271,7 @@ function renderBoard(ctrl) {
     tag: 'div',
     attrs: {
       id: 'cg-board',
-      'class': 'cg-board'
+      'class': 'cg-board orientation-' + ctrl.data.orientation
     },
     children: renderContent(ctrl)
   };
@@ -309,7 +310,7 @@ function bindEvents(ctrl, el) {
   el.addEventListener('touchcancel', oncancel);
 }
 
-module.exports = function(ctrl) {
+function view(ctrl) {
   var onresizeHandler;
   return {
     tag: 'div',
@@ -325,28 +326,40 @@ module.exports = function(ctrl) {
         var boardEl = e.target;
         // previous ui state for diffing and rendering changes
         var prevState;
+        // wrapper node for diffing minimal dom mode
+        var prevNode = e.virtualNode;
 
         if (!ctrl.data.viewOnly) bindEvents(ctrl, boardEl);
+
         ctrl.data.bounds = boardEl.getBoundingClientRect();
         ctrl.data.element = document.getElementById('cg-board');
-        vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
+
+        if (!ctrl.data.minimalDom) vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
+
         ctrl.data.render = function(resizeFlag) {
-          // console.time('diff');
-          diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
-          // console.timeEnd('diff');
-          prevState = savePrevData(ctrl);
+          if (ctrl.data.minimalDom) {
+            var newNode = view(ctrl);
+            vdom.update(prevNode, newNode);
+            prevNode = newNode;
+          } else {
+            diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
+            prevState = savePrevData(ctrl);
+          }
         };
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
         };
+
         onresizeHandler = function() {
           ctrl.data.bounds = boardEl.getBoundingClientRect();
           ctrl.data.render('resize');
         };
         window.addEventListener('resize', onresizeHandler);
-        // render once
-        prevState = savePrevData(ctrl);
-        ctrl.data.render();
+
+        if (!ctrl.data.minimalDom) {
+          prevState = savePrevData(ctrl);
+          ctrl.data.render();
+        }
       },
       $destroyed: function() {
         window.removeEventListener('resize', onresizeHandler);
@@ -354,4 +367,6 @@ module.exports = function(ctrl) {
     },
     children: renderBoard(ctrl)
   };
-};
+}
+
+module.exports = view;
