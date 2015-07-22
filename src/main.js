@@ -3,19 +3,21 @@ var ctrl = require('./ctrl');
 var view = require('./view');
 var api = require('./api');
 
-// for usage outside of mithril
-function init(element, config) {
+function render(element, controller) {
+  vdom.append(element, view(controller));
+}
 
+function standalone(element, config) {
   var controller = new ctrl(config);
 
-  vdom.append(element, view(controller));
+  render(element, controller);
 
   return api(controller);
 }
 
-module.exports = init;
+module.exports = standalone;
+module.exports.render = render;
 module.exports.controller = ctrl;
-module.exports.view = view;
 module.exports.fen = require('./fen');
 module.exports.util = require('./util');
 module.exports.configure = require('./configure');

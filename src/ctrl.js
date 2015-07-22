@@ -5,7 +5,7 @@ var configure = require('./configure');
 var anim = require('./anim');
 var drag = require('./drag');
 
-module.exports = function(cfg) {
+function controller(cfg) {
 
   this.data = data(cfg);
 
@@ -33,15 +33,15 @@ module.exports = function(cfg) {
 
   this.setCheck = anim(board.setCheck, this.data, true);
 
-  this.cancelMove = anim(function(data) {
-    board.cancelMove(data);
-    drag.cancel(data);
-  }.bind(this), this.data, true);
+  this.cancelMove = anim(function(d) {
+    board.cancelMove(d);
+    drag.cancel(d);
+  }, this.data, true);
 
-  this.stop = anim(function(data) {
-    board.stop(data);
-    drag.cancel(data);
-  }.bind(this), this.data, true);
+  this.stop = anim(function(d) {
+    board.stop(d);
+    drag.cancel(d);
+  }, this.data, true);
 
   this.explode = function(keys) {
     if (!this.data.render) return;
@@ -52,4 +52,6 @@ module.exports = function(cfg) {
       this.data.renderRAF();
     }.bind(this), 200);
   }.bind(this);
-};
+}
+
+module.exports = controller;
