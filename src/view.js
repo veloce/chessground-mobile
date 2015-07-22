@@ -97,23 +97,24 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
 }
 
 function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
-  var occupied = !!ctrl.data.pieces[key];
-  var isMoveDest = ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key);
-  var wasMoveDest = ctrl.data.movable.showDests && util.containsX(prevState.dests[prevState.selected], key);
-  var isSelected = key === ctrl.data.selected;
+  var data = ctrl.data;
+  var occupied = !!data.pieces[key];
+  var isMoveDest = data.selected && util.containsX(data.movable.dests[data.selected], key);
+  var wasMoveDest = prevState.selected && util.containsX(prevState.dests[prevState.selected], key);
+  var isSelected = key === data.selected;
   var wasSelected = key === prevState.selected;
-  var isLastMove = ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key);
-  var wasLastMove = ctrl.data.highlight.lastMove && util.contains2(prevState.lastMove, key);
-  var isCheck = ctrl.data.highlight.check && ctrl.data.check === key;
-  var wasCheck = ctrl.data.highlight.check && prevState.check === key;
-  var isPremove = util.contains2(ctrl.data.premovable.current, key);
+  var isLastMove = util.contains2(data.lastMove, key);
+  var wasLastMove = util.contains2(prevState.lastMove, key);
+  var isCheck = data.check === key;
+  var wasCheck = prevState.check === key;
+  var isPremove = util.contains2(data.premovable.current, key);
   var wasPremove = util.contains2(prevState.premove, key);
-  var isPremoveDest = ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key);
-  var wasPremoveDest = ctrl.data.premovable.showDests && util.containsX(prevState.premoveDests, key);
+  var isPremoveDest = data.premovable.current && util.containsX(data.premovable.dests, key);
+  var wasPremoveDest = prevState.premove && util.containsX(prevState.premoveDests, key);
   var isExploding = ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1;
   var wasExploding = prevState.exploding && prevState.exploding.indexOf(key) !== -1;
 
-  var pos = canvasAPI.squarePos(key, ctrl.data.bounds, asWhite);
+  var pos = canvasAPI.squarePos(key, data.bounds, asWhite);
 
   // clear any prev state
   if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
@@ -122,31 +123,31 @@ function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
   }
 
   if (isSelected) {
-    canvasAPI.drawSquare(pos, ctrl.data.colors.selected, ctx);
+    canvasAPI.drawSquare(pos, data.colors.selected, ctx);
   }
   else if (isMoveDest) {
     if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, ctrl.data.colors.moveDest, ctx);
+      canvasAPI.drawPossibleDestOccupied(pos, data.colors.moveDest, ctx);
     else
-      canvasAPI.drawPossibleDest(pos, ctrl.data.colors.moveDest, ctx);
+      canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
   }
   else if (isLastMove) {
-    canvasAPI.drawSquare(pos, ctrl.data.colors.lastMove, ctx);
+    canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
   }
   else if (isPremove) {
-    canvasAPI.drawSquare(pos, ctrl.data.colors.premove, ctx);
+    canvasAPI.drawSquare(pos, data.colors.premove, ctx);
   }
   else if (isPremoveDest) {
     if (occupied)
-      canvasAPI.drawPossibleDestOccupied(pos, ctrl.data.colors.premoveDest, ctx);
+      canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
     else
-      canvasAPI.drawPossibleDest(pos, ctrl.data.colors.premoveDest, ctx);
+      canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
   }
   else if (isCheck) {
-    canvasAPI.drawCheck(pos, ctrl.data.colors.check, ctx);
+    canvasAPI.drawCheck(pos, data.colors.check, ctx);
   }
   if (isExploding) {
-    canvasAPI.drawSquare(pos, ctrl.data.colors.exploding, ctx);
+    canvasAPI.drawSquare(pos, data.colors.exploding, ctx);
   }
 }
 
