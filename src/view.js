@@ -42,6 +42,7 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
   var ctx = canvas.getContext('2d');
   var asWhite = ctrl.data.orientation === 'white';
   var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl;
+  var forceClearSquares = false;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
@@ -56,9 +57,10 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
       var bpos = util.boardpos(pos, asWhite);
       squareEl.style.left = bpos.left + '%';
       squareEl.style.bottom = bpos.bottom + '%';
+      forceClearSquares = true;
     }
     // draw highlights
-    drawLights(ctx, key, asWhite, ctrl, prevState, isResize);
+    drawLight(ctx, key, asWhite, ctrl, prevState, isResize || forceClearSquares);
     // remove previous fading if any when animation is finished
     if (!fading && prevFading) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
@@ -71,8 +73,8 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
         // same piece same square: do nothing
         if (piece.role === prevPiece.role && piece.color === prevPiece.color) {
           continue;
-        } // different pieces: remove old piece and put new one
-        else {
+        } else {
+          // different pieces: remove old piece and put new one
           pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
           squareEl.replaceChild(pieceEl, squareEl.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
@@ -96,7 +98,7 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
   }
 }
 
-function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
+function drawLight(ctx, key, asWhite, ctrl, prevState, forceClear) {
   var data = ctrl.data;
   var occupied = !!data.pieces[key];
   var isMoveDest = data.selected && util.containsX(data.movable.dests[data.selected], key);
@@ -118,7 +120,7 @@ function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
 
   // clear any prev light
   if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
-    wasPremoveDest || wasExploding || isResize) {
+    wasPremoveDest || wasExploding || forceClear) {
     pos = canvasAPI.squarePos(key, data.bounds, asWhite);
     canvasAPI.clearSquare(pos, ctx);
   }
