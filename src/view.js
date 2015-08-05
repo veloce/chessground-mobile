@@ -69,7 +69,7 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
       // a piece was already there
       if (prevPiece) {
         // same piece same square: do nothing
-        if (piece === prevPiece) {
+        if (piece.role === prevPiece.role && piece.color === prevPiece.color) {
           continue;
         } // different pieces: remove old piece and put new one
         else {
