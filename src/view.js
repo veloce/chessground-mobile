@@ -109,8 +109,8 @@ function drawLights(ctx, key, asWhite, ctrl, prevState, isResize) {
   var wasCheck = prevState.check === key;
   var isPremove = util.contains2(data.premovable.current, key);
   var wasPremove = util.contains2(prevState.premove, key);
-  var isPremoveDest = data.premovable.current && util.containsX(data.premovable.dests, key);
-  var wasPremoveDest = prevState.premove && util.containsX(prevState.premoveDests, key);
+  var isPremoveDest = data.selected && util.containsX(data.premovable.dests, key);
+  var wasPremoveDest = prevState.selected && util.containsX(prevState.premoveDests, key);
   var isExploding = ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1;
   var wasExploding = prevState.exploding && prevState.exploding.indexOf(key) !== -1;
 
