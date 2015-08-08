@@ -7,18 +7,6 @@ var easing = {
   }
 };
 
-function fixPieceElementsAfterAnimating(data) {
-  if (data.animation.current) {
-    var keys = Object.keys(data.animation.current.animating);
-    for (var i = 0, len = keys.length; i < len; i++) {
-      var p = data.animation.current.animating[keys[i]];
-      if (p && data.minimalDom) p.style[util.transformProp()] = '';
-      else if (p) p.removeAttribute('style');
-    }
-  }
-  data.animation.current = {};
-}
-
 function makePiece(k, piece, invert) {
   var key = invert ? util.invertKey(k) : k;
   return {
@@ -101,22 +89,14 @@ function roundBy(n, by) {
   return Math.round(n * by) / by;
 }
 
-function go(data, running) {
+function go(data) {
   // animation was canceled
-  if (!data.animation.current.start) {
-    fixPieceElementsAfterAnimating(data);
-    data.render();
-    return;
-  }
+  if (!data.animation.current.start) return;
   var rest = 1 - (Date.now() - data.animation.current.start) / data.animation.current.duration;
   if (rest <= 0) {
-    fixPieceElementsAfterAnimating(data);
+    data.animation.current = {};
     data.render();
   } else {
-    // render once to have all pieces there
-    if (!running) {
-      data.render();
-    }
     var ease = easing.easeInOutCubic(rest);
     var anims = data.animation.current.anims;
     var animsK = Object.keys(anims);
@@ -124,18 +104,9 @@ function go(data, running) {
       var key = animsK[i];
       var cfg = anims[key];
       cfg[1] = [roundBy(cfg[0][0] * ease, 10), roundBy(cfg[0][1] * ease, 10)];
-      var newPieceEl;
-      if (data.animation.current.animating[key]) newPieceEl = data.animation.current.animating[key];
-      else {
-        var sel = data.minimalDom ? '.cg-piece.' + key : '.' + key + ' > .cg-piece';
-        newPieceEl = data.element.querySelector(sel);
-        data.animation.current.animating[key] = newPieceEl;
-      }
-      if (newPieceEl) {
-        newPieceEl.style[util.transformProp()] = util.translate(cfg[1]);
-      }
     }
-    requestAnimationFrame(go.bind(undefined, data, true));
+    data.render();
+    requestAnimationFrame(go.bind(undefined, data));
   }
 }
 
@@ -153,7 +124,6 @@ function animate(transformation, data) {
   var plan = computePlan(prev, data);
   if (Object.keys(plan.anims).length > 0 || plan.fadings.length > 0) {
     var alreadyRunning = data.animation.current.start;
-    if (alreadyRunning) fixPieceElementsAfterAnimating(data);
     data.animation.current = {
       start: Date.now(),
       duration: data.animation.duration,
@@ -161,7 +131,7 @@ function animate(transformation, data) {
       fadings: plan.fadings,
       animating: {}
     };
-    if (!alreadyRunning) requestAnimationFrame(go.bind(undefined, data, false));
+    if (!alreadyRunning) requestAnimationFrame(go.bind(undefined, data));
   } else {
     // don't animate, just render right away
     data.renderRAF();

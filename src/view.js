@@ -7,6 +7,7 @@ function savePrevData(ctrl) {
   var cloned = {
     pieces: {},
     fadings: {},
+    anims: {},
     orientation: '',
     selected: null,
     check: null,
@@ -20,8 +21,11 @@ function savePrevData(ctrl) {
   for (k in ctrl.data.pieces) {
     cloned.pieces[k] = ctrl.data.pieces[k];
   }
+  for (k in ctrl.data.animation.current.anims) {
+    cloned.anims[k] = ctrl.data.animation.current.anims[k];
+  }
   for (k in ctrl.data.animation.current.fadings) {
-    cloned.fadings[k] = ctrl.data.animation.current.fadings;
+    cloned.fadings[k] = ctrl.data.animation.current.fadings[k];
   }
   cloned.dests = ctrl.data.movable.dests;
   cloned.selected = ctrl.data.selected;
@@ -41,12 +45,15 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
   var canvas = document.getElementById('cg-lights');
   var ctx = canvas.getContext('2d');
   var asWhite = ctrl.data.orientation === 'white';
-  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl;
+  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, anim, prevAnim;
   var forceClearSquares = false;
+  var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
     prevPiece = prevState.pieces[key];
+    anim = anims && anims[key];
+    prevAnim = prevState.anims[key];
     fading = fadings && fadings[key];
     prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
@@ -62,12 +69,19 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
     // draw highlights
     drawLight(ctx, key, asWhite, ctrl, prevState, isResize || forceClearSquares);
     // remove previous fading if any when animation is finished
-    if (!fading && prevFading) {
+    if (prevFading && prevFading !== fading) {
       var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
       if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
     }
     // there is a now piece at this square
     if (piece) {
+      if (anim) {
+        var animP = squareEl.querySelector('.cg-piece');
+        if (animP) animP.style[util.transformProp()] = util.translate(anim[1]);
+      } else if (prevAnim) {
+        var prevAnimP = squareEl.querySelector('.cg-piece');
+        if (prevAnimP) prevAnimP.removeAttribute('style');
+      }
       // a piece was already there
       if (prevPiece) {
         // same piece same square: do nothing
@@ -80,7 +94,7 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           if (fading) {
-            vdom.append(squareEl, renderFading(fading));
+            vdom.append(squareEl, renderCaptured(fading));
           }
         }
       } // empty square before: just put the piece
@@ -186,7 +200,7 @@ function renderPiece(ctrl, key, p) {
   };
 }
 
-function renderFading(p) {
+function renderCaptured(p) {
   return {
     tag: 'div',
     attrs: {
@@ -344,8 +358,10 @@ function view(ctrl) {
             vdom.update(prevNode, newNode);
             prevNode = newNode;
           } else {
+            console.time('diff');
             diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
             prevState = savePrevData(ctrl);
+            console.timeEnd('diff');
           }
         };
         ctrl.data.renderRAF = function() {
