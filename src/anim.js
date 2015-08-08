@@ -153,19 +153,15 @@ function animate(transformation, data) {
   var plan = computePlan(prev, data);
   if (Object.keys(plan.anims).length > 0 || plan.fadings.length > 0) {
     var alreadyRunning = data.animation.current.start;
-    // don't run more than one animation at the same time
-    // if a board transformation is triggered during an animation it will render
-    // directly at the latest when running animation is finished
-    if (!alreadyRunning) {
-      data.animation.current = {
-        start: Date.now(),
-        duration: data.animation.duration,
-        anims: plan.anims,
-        fadings: plan.fadings,
-        animating: {}
-      };
-      requestAnimationFrame(go.bind(undefined, data, false));
-    }
+    if (alreadyRunning) fixPieceElementsAfterAnimating(data);
+    data.animation.current = {
+      start: Date.now(),
+      duration: data.animation.duration,
+      anims: plan.anims,
+      fadings: plan.fadings,
+      animating: {}
+    };
+    if (!alreadyRunning) requestAnimationFrame(go.bind(undefined, data, false));
   } else {
     // don't animate, just render right away
     data.renderRAF();

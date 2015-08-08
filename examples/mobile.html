@@ -42,6 +42,9 @@
     <div class="chessground wood merida coordinates" id="ground"></div>
     <script>
       (function() {
+        var test = window.test = {};
+        test.ply = 0;
+        test.sit = ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'];
         var ground;
         var chess = new Chess();
         var onMove = function(orig, dest) {
@@ -53,13 +56,15 @@
               dests: chessToDests(chess)
             }
           });
+          test.sit.push(ground.getFen());
+          test.ply++;
           console.log(ground.getFen());
         };
         ground = window.ground = Chessground(document.getElementById('ground'), {
           viewOnly: false,
           turnColor: 'white',
           animation: {
-            duration: 500
+            duration: 200
           },
           draggable: {
             squareTarget: true
@@ -74,6 +79,37 @@
             }
           }
         });
+
+        test.jump = function(p) {
+          if (p >= 0 && p <= test.sit.length) {
+            test.ply = p;
+            window.ground.set({ fen: test.sit[test.ply] });
+          }
+        };
+
+        test.next = function() {
+          test.jump(test.ply + 1);
+        };
+
+        test.prev = function() {
+          test.jump(test.ply - 1);
+        };
+
+        document.addEventListener('keydown', function(e) {
+          switch(e.which) {
+            case 37: // left
+              test.prev();
+              break;
+
+            case 39: // right
+              test.next();
+              break;
+
+            default: return; // exit this handler for other keys
+          }
+          e.preventDefault(); // prevent the default action (scroll / move caret)
+        });
+
       })();
     </script>
 
