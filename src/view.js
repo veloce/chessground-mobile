@@ -73,16 +73,16 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
     drawLight(ctx, key, asWhite, ctrl, prevState, isResize || forceClearSquares);
     // remove previous fading if any when animation is finished
     if (prevFading && prevFading !== fading) {
-      var fadingPieceEl = squareEl.querySelector('.cg-piece.fading');
+      var fadingPieceEl = squareEl.getElementsByClassName('cg-piece fading').item(0);
       if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
     }
     // there is a now piece at this square
     if (piece) {
       if (anim) {
-        var animP = squareEl.querySelector('.cg-piece');
+        var animP = squareEl.getElementsByClassName('cg-piece').item(0);
         if (animP) animP.style[util.transformProp()] = util.translate(anim[1]);
       } else if (prevAnim) {
-        var prevAnimP = squareEl.querySelector('.cg-piece');
+        var prevAnimP = squareEl.getElementsByClassName('cg-piece').item(0);
         if (prevAnimP) prevAnimP.removeAttribute('style');
       }
       // a piece was already there
