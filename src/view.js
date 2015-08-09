@@ -17,15 +17,18 @@ function savePrevData(ctrl) {
     premoveDests: [],
     exploding: []
   };
-  var k;
-  for (k in ctrl.data.pieces) {
-    cloned.pieces[k] = ctrl.data.pieces[k];
+  var currAnim = ctrl.data.animation.current;
+  var pK = ctrl.data.pieces ? Object.keys(ctrl.data.pieces) : [];
+  var aK = currAnim.anims ? Object.keys(currAnim.anims) : [];
+  var fK = currAnim.fadings ? Object.keys(currAnim.fadings) : [];
+  for (var i = 0, ilen = pK.length; i < ilen; i++) {
+    cloned.pieces[pK[i]] = ctrl.data.pieces[pK[i]];
   }
-  for (k in ctrl.data.animation.current.anims) {
-    cloned.anims[k] = ctrl.data.animation.current.anims[k];
+  for (var j = 0, jlen = aK.length; j < jlen; j++) {
+    cloned.anims[aK[j]] = ctrl.data.animation.current.anims[aK[j]];
   }
-  for (k in ctrl.data.animation.current.fadings) {
-    cloned.fadings[k] = ctrl.data.animation.current.fadings[k];
+  for (var k = 0, klen = fK.length; k < klen; k++) {
+    cloned.fadings[fK[k]] = ctrl.data.animation.current.fadings[fK[k]];
   }
   cloned.dests = ctrl.data.movable.dests;
   cloned.selected = ctrl.data.selected;
