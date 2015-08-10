@@ -361,10 +361,8 @@ function view(ctrl) {
             vdom.update(prevNode, newNode);
             prevNode = newNode;
           } else {
-            console.time('diff');
             diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
             prevState = savePrevData(ctrl);
-            console.timeEnd('diff');
           }
         };
         ctrl.data.renderRAF = function() {
