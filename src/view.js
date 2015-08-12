@@ -186,10 +186,10 @@ function renderContent(ctrl) {
 }
 
 function bindEvents(ctrl, el, context) {
-  var onstart = util.partial(drag.start, ctrl.data);
-  var onmove = util.partial(drag.move, ctrl.data);
-  var onend = util.partial(drag.end, ctrl.data);
-  var oncancel = util.partial(drag.cancel, ctrl.data);
+  var onstart = drag.start.bind(undefined, ctrl.data);
+  var onmove = drag.move.bind(undefined, ctrl.data);
+  var onend = drag.end.bind(undefined, ctrl.data);
+  var oncancel = drag.cancel.bind(undefined, ctrl.data);
   var startEvents = ['touchstart', 'mousedown'];
   var moveEvents = ['touchmove', 'mousemove'];
   var endEvents = ['touchend', 'mouseup'];
