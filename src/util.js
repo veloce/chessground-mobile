@@ -82,11 +82,15 @@ function eventPosition(e) {
 }
 
 function partialApply(fn, args) {
-  return fn.bind.apply(fn, [null].concat(args));
+  return fn.bind.apply(fn, [undefined].concat(args));
 }
 
 function partial() {
-  return partialApply(arguments[0], Array.prototype.slice.call(arguments, 1));
+  var args = new Array(arguments.length);
+  for (var i = 0; i < args.length; ++i) {
+    args[i] = arguments[i];
+  }
+  return partialApply(args[0], args.slice(1));
 }
 
 function isRightButton(e) {

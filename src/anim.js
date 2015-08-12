@@ -39,11 +39,13 @@ function computePlan(prev, current) {
     invert = prev.orientation !== current.orientation,
     prePieces = {},
     white = current.orientation === 'white';
-  for (var pk in prev.pieces) {
+  var pKs = Object.keys(prev.pieces), pk;
+  for (var j = 0, jlen = pKs.length; j < jlen; j++) {
+    pk = pKs[j];
     var piece = makePiece(pk, prev.pieces[pk], invert);
     prePieces[piece.key] = piece;
   }
-  for (var i = 0; i < util.allKeys.length; i++) {
+  for (var i = 0, ilen = util.allKeys.length; i < ilen; i++) {
     var key = util.allKeys[i];
     if (key !== current.movable.dropped[1]) {
       var curP = current.pieces[key];
@@ -61,7 +63,7 @@ function computePlan(prev, current) {
     }
   }
   news.forEach(function(newP) {
-    var nPreP = closer(newP, missings.filter(util.partial(samePiece, newP)));
+    var nPreP = closer(newP, missings.filter(samePiece.bind(undefined, newP)));
     if (nPreP) {
       var orig = white ? nPreP.pos : newP.pos;
       var dest = white ? newP.pos : nPreP.pos;
@@ -117,8 +119,13 @@ function animate(transformation, data) {
     pieces: {}
   };
   // clone pieces
-  for (var key in data.pieces) {
-    prev.pieces[key] = data.pieces[key];
+  var pKs = Object.keys(data.pieces), key;
+  for (var i = 0, len = pKs.length; i < len; i++) {
+    key = pKs[i];
+    prev.pieces[key] = {
+      role: data.pieces[key].role,
+      color: data.pieces[key].color
+    };
   }
   var result = transformation();
   var plan = computePlan(prev, data);
@@ -144,7 +151,11 @@ function animate(transformation, data) {
 // and mutates the board.
 module.exports = function(transformation, data, skip) {
   return function() {
-    var transformationArgs = [data].concat(Array.prototype.slice.call(arguments, 0));
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; ++i) {
+      args[i] = arguments[i];
+    }
+    var transformationArgs = [data].concat(args);
     if (!data.render) return transformation.apply(null, transformationArgs);
     else if (data.animation.enabled && !skip)
       return animate(util.partialApply(transformation, transformationArgs), data);
