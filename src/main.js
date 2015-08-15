@@ -1,13 +1,15 @@
-var vdom = require('./vdom');
+var m = require('mithril');
 var ctrl = require('./ctrl');
 var view = require('./view');
 var api = require('./api');
 
 function render(element, controller) {
-  vdom.append(element, view(controller));
+  m.render(element, view(controller));
 }
 
-function standalone(element, config) {
+// for usage outside of mithril
+function init(element, config) {
+
   var controller = new ctrl(config);
 
   render(element, controller);
@@ -15,7 +17,7 @@ function standalone(element, config) {
   return api(controller);
 }
 
-module.exports = standalone;
+module.exports = init;
 module.exports.render = render;
 module.exports.controller = ctrl;
 module.exports.fen = require('./fen');

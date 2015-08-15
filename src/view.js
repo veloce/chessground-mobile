@@ -2,6 +2,7 @@ var drag = require('./drag');
 var util = require('./util');
 var vdom = require('./vdom');
 var canvasAPI = require('./canvas');
+var m = require('mithril');
 
 function savePrevData(ctrl) {
   var cloned = {
@@ -61,7 +62,6 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
     prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
     // square pos change if orientation change
-    // TODO use vdom node update
     if (prevState.orientation !== ctrl.data.orientation) {
       var pos = util.key2pos(key);
       var bpos = util.boardpos(pos, asWhite);
@@ -96,9 +96,8 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
           squareEl.replaceChild(pieceEl, squareEl.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
-          if (fading) {
-            vdom.append(squareEl, renderCaptured(fading));
-          }
+          if (fading)
+            squareEl.appendChild(vdom.create(renderCaptured(fading)).dom);
         }
       } // empty square before: just put the piece
       else {
@@ -290,7 +289,33 @@ function renderBoard(ctrl) {
     tag: 'div',
     attrs: {
       id: 'cg-board',
-      'class': 'cg-board orientation-' + ctrl.data.orientation
+      className: 'cg-board orientation-' + ctrl.data.orientation,
+      config: function(el, isUpdate, context) {
+        if (isUpdate) return;
+
+        bindEvents(ctrl, el, context);
+
+        ctrl.data.render = function(resizeFlag) {
+          if (ctrl.data.minimalDom) {
+            m.render(el, renderContent(ctrl));
+          } else {
+            diffAndRenderBoard(ctrl, context.prevState, resizeFlag === 'resize');
+            context.prevState = savePrevData(ctrl);
+          }
+        };
+        ctrl.data.renderRAF = function() {
+          requestAnimationFrame(ctrl.data.render);
+        };
+
+        ctrl.data.bounds = el.getBoundingClientRect();
+        ctrl.data.element = el;
+
+        if (!ctrl.data.minimalDom) {
+          el.parentElement.appendChild(vdom.create(renderCanvas(ctrl.data.bounds)).dom);
+          context.prevState = savePrevData(ctrl);
+        }
+        ctrl.data.render();
+      }
     },
     children: renderContent(ctrl)
   };
@@ -318,73 +343,44 @@ function renderCanvas(bounds) {
   };
 }
 
-function bindEvents(ctrl, el) {
+function bindEvents(ctrl, el, context) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
   var oncancel = drag.cancel.bind(undefined, ctrl.data);
-  el.addEventListener('touchstart', onstart);
-  el.addEventListener('touchmove', onmove);
-  el.addEventListener('touchend', onend);
-  el.addEventListener('touchcancel', oncancel);
+  var onresize = function() {
+    ctrl.data.bounds = el.getBoundingClientRect();
+    ctrl.data.render('resize');
+  };
+  if (!ctrl.data.viewOnly) {
+    el.addEventListener('touchstart', onstart);
+    el.addEventListener('touchmove', onmove);
+    el.addEventListener('touchend', onend);
+    el.addEventListener('touchcancel', oncancel);
+  }
+  window.addEventListener('resize', onresize);
+  context.onunload = function() {
+    el.removeEventListener('touchstart', onstart);
+    el.removeEventListener('touchmove', onmove);
+    el.removeEventListener('touchend', onend);
+    el.removeEventListener('touchcancel', oncancel);
+    window.removeEventListener('resize', onresize);
+  };
 }
 
 function view(ctrl) {
-  var onresizeHandler;
   return {
     tag: 'div',
     attrs: {
-      'class': [
+      className: [
         'cg-board-wrap',
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
       ].join(' ')
     },
-    events: {
-      $created: function(e) {
-        var boardEl = e.target;
-        // previous ui state for diffing and rendering changes
-        var prevState;
-        // wrapper node for diffing minimal dom mode
-        var prevNode = e.virtualNode;
-
-        if (!ctrl.data.viewOnly) bindEvents(ctrl, boardEl);
-
-        ctrl.data.bounds = boardEl.getBoundingClientRect();
-        ctrl.data.element = document.getElementById('cg-board');
-
-        if (!ctrl.data.minimalDom) vdom.append(boardEl, renderCanvas(ctrl.data.bounds));
-
-        ctrl.data.render = function(resizeFlag) {
-          if (ctrl.data.minimalDom) {
-            var newNode = view(ctrl);
-            vdom.update(prevNode, newNode);
-            prevNode = newNode;
-          } else {
-            diffAndRenderBoard(ctrl, prevState, resizeFlag === 'resize');
-            prevState = savePrevData(ctrl);
-          }
-        };
-        ctrl.data.renderRAF = function() {
-          requestAnimationFrame(ctrl.data.render);
-        };
-
-        onresizeHandler = function() {
-          ctrl.data.bounds = boardEl.getBoundingClientRect();
-          ctrl.data.render('resize');
-        };
-        window.addEventListener('resize', onresizeHandler);
-
-        if (!ctrl.data.minimalDom) {
-          prevState = savePrevData(ctrl);
-          ctrl.data.render();
-        }
-      },
-      $destroyed: function() {
-        window.removeEventListener('resize', onresizeHandler);
-      }
-    },
-    children: renderBoard(ctrl)
+    children: [
+      renderBoard(ctrl)
+    ]
   };
 }
 
