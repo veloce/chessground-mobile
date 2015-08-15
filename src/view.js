@@ -293,6 +293,9 @@ function renderBoard(ctrl) {
       config: function(el, isUpdate, context) {
         if (isUpdate) return;
 
+        ctrl.data.bounds = el.getBoundingClientRect();
+        ctrl.data.element = el;
+
         bindEvents(ctrl, el, context);
 
         ctrl.data.render = function(resizeFlag) {
@@ -306,9 +309,6 @@ function renderBoard(ctrl) {
         ctrl.data.renderRAF = function() {
           requestAnimationFrame(ctrl.data.render);
         };
-
-        ctrl.data.bounds = el.getBoundingClientRect();
-        ctrl.data.element = el;
 
         if (!ctrl.data.minimalDom) {
           el.parentElement.appendChild(vdom.create(renderCanvas(ctrl.data.bounds)).dom);
@@ -349,7 +349,7 @@ function bindEvents(ctrl, el, context) {
   var onend = drag.end.bind(undefined, ctrl.data);
   var oncancel = drag.cancel.bind(undefined, ctrl.data);
   var onresize = function() {
-    ctrl.data.bounds = el.getBoundingClientRect();
+    ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
     ctrl.data.render('resize');
   };
   if (!ctrl.data.viewOnly) {
