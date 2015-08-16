@@ -49,7 +49,7 @@ function drawCheck(pos, ctx) {
   var x = pos.x + pos.width / 2;
   var y = pos.y + pos.width / 2;
   var gradient = ctx.createRadialGradient(x, y, r1, x, y, r2);
-  gradient.addColorStop(0, 'rgba(158, 0, 0, 0.1)');
+  gradient.addColorStop(0, 'rgba(158, 0, 0, 0)');
   gradient.addColorStop(1, 'red');
   ctx.fillStyle = gradient;
   ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
