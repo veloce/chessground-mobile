@@ -343,7 +343,7 @@ function renderCanvas(bounds) {
   };
 }
 
-function bindEvents(ctrl, el, context) {
+function bindEvents(ctrl, el) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
@@ -359,13 +359,6 @@ function bindEvents(ctrl, el, context) {
     el.addEventListener('touchcancel', oncancel);
   }
   window.addEventListener('resize', onresize);
-  context.onunload = function() {
-    el.removeEventListener('touchstart', onstart);
-    el.removeEventListener('touchmove', onmove);
-    el.removeEventListener('touchend', onend);
-    el.removeEventListener('touchcancel', oncancel);
-    window.removeEventListener('resize', onresize);
-  };
 }
 
 function view(ctrl) {
