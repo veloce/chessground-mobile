@@ -295,9 +295,6 @@ function renderBoard(ctrl) {
 
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
-
-        bindEvents(ctrl, el, context);
-
         ctrl.data.render = function(resizeFlag) {
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
@@ -312,9 +309,26 @@ function renderBoard(ctrl) {
 
         if (!ctrl.data.minimalDom) {
           el.parentElement.appendChild(vdom.create(renderCanvas(ctrl.data.bounds)).dom);
-          context.prevState = savePrevData(ctrl);
         }
+
+        // set initial ui state
+        context.prevState = {
+          pieces: ctrl.data.pieces,
+          fadings: {},
+          anims: {},
+          orientation: ctrl.data.orientation,
+          selected: null,
+          check: null,
+          lastMove: null,
+          dests: [],
+          premove: null,
+          premoveDests: [],
+          exploding: []
+        };
+
         ctrl.data.render();
+
+        bindEvents(ctrl, el, context);
       }
     },
     children: renderContent(ctrl)
