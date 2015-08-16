@@ -104,7 +104,6 @@ module.exports = function(cfg) {
       lastMove: 'rgba(155, 199, 0, 0.3)',
       premove: 'rgba(20, 30, 85, 0.3)',
       premoveDest: 'rgba(20, 30, 85, 0.4)',
-      check: 'red',
       exploding: 'rgba(255, 0, 0, 0.5)'
     }
   };

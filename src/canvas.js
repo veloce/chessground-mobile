@@ -42,14 +42,14 @@ function drawPossibleDestOccupied(pos, color, ctx) {
   ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
 }
 
-function drawCheck(pos, color, ctx) {
+function drawCheck(pos, ctx) {
   var r1 = pos.width * 0.75;
   var r2 = 0;
   var x = pos.x + pos.width / 2;
   var y = pos.y + pos.width / 2;
   var gradient = ctx.createRadialGradient(x, y, r1, x, y, r2);
-  gradient.addColorStop(0, 'transparent');
-  gradient.addColorStop(1, color);
+  gradient.addColorStop(0, 'rgba(158, 0, 0, 0.1)');
+  gradient.addColorStop(1, 'red');
   ctx.fillStyle = gradient;
   ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
 }

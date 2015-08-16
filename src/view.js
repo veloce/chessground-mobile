@@ -168,7 +168,7 @@ function drawLight(ctx, key, asWhite, ctrl, prevState, forceClear) {
         canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
     }
     else if (isCheck) {
-      canvasAPI.drawCheck(pos, data.colors.check, ctx);
+      canvasAPI.drawCheck(pos, ctx);
     }
     if (isExploding) {
       canvasAPI.drawSquare(pos, data.colors.exploding, ctx);
