@@ -2,12 +2,13 @@ var util = require('./util');
 
 function squarePos(key, bounds, asWhite) {
   var pos = util.key2pos(key);
-  var squareW = bounds.width * 0.125;
+  var squareW = bounds.width / 8;
   var x = (asWhite ? pos[0] - 1 : 8 - pos[0]) * squareW;
   var y = (asWhite ? 8 - pos[1] : pos[1] - 1) * squareW;
+  squareW = (0.5 + squareW) | 0;
   return {
-    x: x,
-    y: y,
+    x: (0.5 + x) | 0,
+    y: (0.5 + y) | 0,
     width: squareW,
     height: squareW
   };
