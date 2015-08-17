@@ -72,7 +72,7 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
     // draw highlights
     drawLight(ctx, key, asWhite, ctrl, prevState, isResize || forceClearSquares);
     // remove previous fading if any when animation is finished
-    if (prevFading && prevFading !== fading) {
+    if (prevFading && !fading) {
       var fadingPieceEl = squareEl.getElementsByClassName('cg-piece fading').item(0);
       if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
     }
@@ -96,7 +96,8 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
           squareEl.replaceChild(pieceEl, squareEl.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
-          if (fading)
+          // make sure there is no fading piece already (may happen with promotion)
+          if (fading && !prevFading)
             squareEl.appendChild(vdom.create(renderCaptured(fading)).dom);
         }
       } // empty square before: just put the piece
