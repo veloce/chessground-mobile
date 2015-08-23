@@ -67,6 +67,12 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
       var bpos = util.boardpos(pos, asWhite);
       squareEl.style.left = bpos.left + '%';
       squareEl.style.bottom = bpos.bottom + '%';
+      if (ctrl.data.coordinates) {
+        squareEl.removeAttribute('data-coord-x');
+        squareEl.removeAttribute('data-coord-y');
+        if (pos[1] === (asWhite ? 1 : 8)) squareEl.setAttribute('data-coord-x', util.files[pos[0] - 1]);
+        if (pos[0] === (asWhite ? 8 : 1)) squareEl.setAttribute('data-coord-y', pos[1]);
+      }
       forceClearSquares = true;
     }
     // draw highlights
@@ -229,6 +235,10 @@ function renderSquare(ctrl, pos, asWhite) {
   var children = [];
   if (piece) {
     children.push(renderPiece(ctrl, key, piece));
+  }
+  if (ctrl.data.coordinates) {
+    if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-x'] = file;
+    if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-y'] = rank;
   }
   return {
     tag: 'div',
