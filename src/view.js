@@ -43,14 +43,13 @@ function savePrevData(ctrl) {
   return cloned;
 }
 
-function diffAndRenderBoard(ctrl, prevState, isResize) {
+function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
   var canvas = document.getElementById('cg-lights');
   var ctx = canvas.getContext('2d');
   var asWhite = ctrl.data.orientation === 'white';
   var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, anim, prevAnim;
-  var forceClearSquares = false;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
@@ -61,22 +60,8 @@ function diffAndRenderBoard(ctrl, prevState, isResize) {
     fading = fadings && fadings[key];
     prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
-    // square pos change if orientation change
-    if (prevState.orientation !== ctrl.data.orientation) {
-      var pos = util.key2pos(key);
-      var bpos = util.boardpos(pos, asWhite);
-      squareEl.style.left = bpos.left + '%';
-      squareEl.style.bottom = bpos.bottom + '%';
-      if (ctrl.data.coordinates) {
-        squareEl.removeAttribute('data-coord-x');
-        squareEl.removeAttribute('data-coord-y');
-        if (pos[1] === (asWhite ? 1 : 8)) squareEl.setAttribute('data-coord-x', util.files[pos[0] - 1]);
-        if (pos[0] === (asWhite ? 8 : 1)) squareEl.setAttribute('data-coord-y', pos[1]);
-      }
-      forceClearSquares = true;
-    }
     // draw highlights
-    drawLight(ctx, key, asWhite, ctrl, prevState, isResize || forceClearSquares);
+    drawLight(ctx, key, asWhite, ctrl, prevState, forceClearSquares);
     // remove previous fading if any when animation is finished
     if (prevFading && !fading) {
       var fadingPieceEl = squareEl.getElementsByClassName('cg-piece fading').item(0);
@@ -310,8 +295,14 @@ function renderBoard(ctrl) {
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
-            diffAndRenderBoard(ctrl, context.prevState, resizeFlag === 'resize');
-            context.prevState = savePrevData(ctrl);
+            if (context.prevState.orientation !== ctrl.data.orientation) {
+              m.render(el, renderContent(ctrl), true);
+              context.prevState = savePrevData(ctrl);
+              diffAndRenderBoard(ctrl, context.prevState, true);
+            } else {
+              diffAndRenderBoard(ctrl, context.prevState, resizeFlag === 'resize');
+              context.prevState = savePrevData(ctrl);
+            }
           }
         };
         ctrl.data.renderRAF = function() {
