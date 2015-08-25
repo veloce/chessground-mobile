@@ -147,17 +147,17 @@ function drawLight(ctx, key, asWhite, ctrl, prevState, forceClear) {
       else
         canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
     }
-    else if (isLastMove) {
-      canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
-    }
-    else if (isPremove) {
-      canvasAPI.drawSquare(pos, data.colors.premove, ctx);
-    }
     else if (isPremoveDest) {
       if (occupied)
         canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
       else
         canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
+    }
+    else if (isPremove) {
+      canvasAPI.drawSquare(pos, data.colors.premove, ctx);
+    }
+    else if (isLastMove) {
+      canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
     }
     else if (isCheck) {
       canvasAPI.drawCheck(pos, ctx);
