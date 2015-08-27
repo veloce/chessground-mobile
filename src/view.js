@@ -289,9 +289,12 @@ function renderBoard(ctrl) {
       config: function(el, isUpdate, context) {
         if (isUpdate) return;
 
+        var scheduledAnimationFrame;
+
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
         ctrl.data.render = function(resizeFlag) {
+          scheduledAnimationFrame = false;
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
@@ -306,6 +309,8 @@ function renderBoard(ctrl) {
           }
         };
         ctrl.data.renderRAF = function() {
+          if (scheduledAnimationFrame) return;
+          scheduledAnimationFrame = true;
           requestAnimationFrame(ctrl.data.render);
         };
 
@@ -364,9 +369,10 @@ function bindEvents(ctrl, el) {
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
   var oncancel = drag.cancel.bind(undefined, ctrl.data);
+  // no need to debounce: resizable only by orientation change
   var onresize = function() {
     ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-    ctrl.data.render('resize');
+    requestAnimationFrame(ctrl.data.render.bind(undefined, 'resize'));
   };
   if (!ctrl.data.viewOnly) {
     el.addEventListener('touchstart', onstart);

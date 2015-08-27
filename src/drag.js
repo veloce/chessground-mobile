@@ -1,13 +1,13 @@
 var board = require('./board');
 var util = require('./util');
 var hold = require('./hold');
-var vdom = require('./vdom');
 
 var originTarget;
 
 // cache access to dom elements
 var draggingPiece;
-var squareTarget;
+
+var scheduledAnimationFrame;
 
 function renderSquareTarget(data, cur) {
   var pos = util.key2pos(cur.over),
@@ -15,34 +15,31 @@ function renderSquareTarget(data, cur) {
     targetWidth = width / 4,
     squareWidth = width / 8,
     asWhite = data.orientation === 'white';
-  var style = {
-    width: targetWidth + 'px',
-    height: targetWidth + 'px',
-    left: (-0.5 * squareWidth) + 'px',
-    top: (-0.5 * squareWidth) + 'px'
-  };
+  var sq = document.createElement('div');
+  var style = sq.style;
   var vector = [
     (asWhite ? pos[0] - 1 : 8 - pos[0]) * squareWidth,
     (asWhite ? 8 - pos[1] : pos[1] - 1) * squareWidth
   ];
+  style.width = targetWidth + 'px';
+  style.height = targetWidth + 'px';
+  style.left = (-0.5 * squareWidth) + 'px';
+  style.top = (-0.5 * squareWidth) + 'px';
   style[util.transformProp()] = util.translate(vector);
-  return {
-    tag: 'div',
-    attrs: {
-      id: 'cg-square-target',
-      style: style
-    }
-  };
+  sq.style = style;
+  sq.className = 'cg-square-target';
+  data.element.appendChild(sq);
+  return sq;
 }
 
-function fixDraggingPieceElementAfterDrag() {
-  if (draggingPiece) {
-    draggingPiece.classList.remove('dragging');
-    draggingPiece.removeAttribute('style');
+function fixDomAfterDrag(data) {
+  var dp = data.element.querySelector('.cg-piece.dragging');
+  if (dp) {
+    dp.classList.remove('dragging');
+    dp.removeAttribute('style');
   }
-  if (squareTarget && squareTarget.parentNode) {
-    squareTarget.parentNode.removeChild(squareTarget);
-  }
+  var sqs = data.element.getElementsByClassName('cg-square-target');
+  while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
 }
 
 function start(data, e) {
@@ -72,7 +69,8 @@ function start(data, e) {
         position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) + 10)
       ],
       bounds: bounds,
-      started: false
+      started: false,
+      squareTarget: null
     };
     draggingPiece = data.element.querySelector('.' + data.draggable.current.orig + ' > .cg-piece');
     hold.start();
@@ -82,61 +80,62 @@ function start(data, e) {
 }
 
 function processDrag(data) {
-  var cur = data.draggable.current;
-  if (cur.orig) {
-    // cancel animations while dragging
-    if (data.animation.current.start &&
-      Object.keys(data.animation.current.anims).indexOf(cur.orig) !== -1)
-      data.animation.current.start = false;
+  if (scheduledAnimationFrame) return;
+  scheduledAnimationFrame = true;
+  requestAnimationFrame(function() {
+    var cur = data.draggable.current;
+    scheduledAnimationFrame = false;
+    if (cur.orig) {
+      // cancel animations while dragging
+      if (data.animation.current.start &&
+        Object.keys(data.animation.current.anims).indexOf(cur.orig) !== -1)
+        data.animation.current.start = false;
 
-    // if moving piece is gone, cancel
-    if (data.pieces[cur.orig] !== cur.piece) cancel(data);
-    else {
-      if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
-        cur.started = true;
-        draggingPiece.classList.add('dragging');
-      }
-      if (cur.started) {
-        cur.pos = [
-          cur.epos[0] - cur.rel[0],
-          cur.epos[1] - cur.rel[1]
-        ];
-
-        // square target setup
-        if (!cur.over) {
-          cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
-          if (cur.over) {
-            cur.prevTarget = cur.over;
-            squareTarget = vdom.append(data.element, renderSquareTarget(data, cur)).dom;
-          } else {
-            if (squareTarget) data.element.removeChild(squareTarget);
-            squareTarget = null;
-          }
+      // if moving piece is gone, cancel
+      if (data.pieces[cur.orig] !== cur.piece) cancel(data);
+      else {
+        if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
+          cur.started = true;
+          draggingPiece.classList.add('dragging');
         }
-        cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
+        if (cur.started) {
+          cur.pos = [
+            cur.epos[0] - cur.rel[0],
+            cur.epos[1] - cur.rel[1]
+          ];
 
-        // move piece
-        draggingPiece.style[util.transformProp()] = util.translate([
-          cur.pos[0] + cur.dec[0],
-          cur.pos[1] + cur.dec[1]
-        ]);
+          cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
+          if (cur.over && !cur.squareTarget) {
+            cur.squareTarget = renderSquareTarget(data, cur);
+          } else if (!cur.over && cur.squareTarget) {
+            if (cur.squareTarget.parentNode) cur.squareTarget.parentNode.removeChild(cur.squareTarget);
+            cur.squareTarget = null;
+          }
 
-        // move square target
-        if (cur.over && squareTarget && cur.over !== cur.prevTarget) {
-          var squareWidth = cur.bounds.width / 8,
+          // move piece
+          draggingPiece.style[util.transformProp()] = util.translate([
+            cur.pos[0] + cur.dec[0],
+            cur.pos[1] + cur.dec[1]
+          ]);
+
+          // move square target
+          if (cur.over && cur.squareTarget && cur.over !== cur.prevTarget) {
+            var squareWidth = cur.bounds.width / 8,
             asWhite = data.orientation === 'white',
             stPos = util.key2pos(cur.over),
             vector = [
               (asWhite ? stPos[0] - 1 : 8 - stPos[0]) * squareWidth,
               (asWhite ? 8 - stPos[1] : stPos[1] - 1) * squareWidth
             ];
-          squareTarget.style[util.transformProp()] = util.translate(vector);
-          cur.prevTarget = cur.over;
+            cur.squareTarget.style[util.transformProp()] = util.translate(vector);
+            cur.prevTarget = cur.over;
+          }
         }
       }
     }
-  }
+  });
 }
+
 
 function move(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
@@ -151,7 +150,7 @@ function end(data, e) {
   var draggable = data.draggable;
   var orig = draggable.current ? draggable.current.orig : null;
   var dest;
-  requestAnimationFrame(fixDraggingPieceElementAfterDrag);
+  requestAnimationFrame(fixDomAfterDrag.bind(undefined, data));
   if (!orig) return;
   // comparing with the origin target is an easy way to test that the end event
   // has the same touch origin
@@ -169,7 +168,7 @@ function end(data, e) {
 }
 
 function cancel(data) {
-  requestAnimationFrame(fixDraggingPieceElementAfterDrag);
+  requestAnimationFrame(fixDomAfterDrag.bind(undefined, data));
   if (data.draggable.current.orig) {
     data.draggable.current = {};
     board.selectSquare(data, null);
