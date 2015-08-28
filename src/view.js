@@ -1,8 +1,9 @@
 var drag = require('./drag');
 var util = require('./util');
-var vdom = require('./vdom');
 var canvasAPI = require('./canvas');
 var m = require('mithril');
+
+var CANVASID = 'cg-lights';
 
 function savePrevData(ctrl) {
   var cloned = {
@@ -46,7 +47,7 @@ function savePrevData(ctrl) {
 function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var canvas = document.getElementById('cg-lights');
+  var canvas = document.getElementById(CANVASID);
   var ctx = canvas.getContext('2d');
   var asWhite = ctrl.data.orientation === 'white';
   var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, anim, prevAnim;
@@ -83,17 +84,17 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
           continue;
         } else {
           // different pieces: remove old piece and put new one
-          pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
+          pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
           squareEl.replaceChild(pieceEl, squareEl.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
           if (fading && !prevFading)
-            squareEl.appendChild(vdom.create(renderCaptured(fading)).dom);
+            squareEl.appendChild(renderCapturedDom(fading));
         }
       } // empty square before: just put the piece
       else {
-        pieceEl = vdom.create(renderPiece(ctrl, key, piece)).dom;
+        pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
         squareEl.appendChild(pieceEl);
       }
     } // no piece at this square
@@ -175,7 +176,7 @@ function pieceClass(p) {
 function renderPiece(ctrl, key, p) {
   var attrs = {
     style: {},
-    'class': pieceClass(p)
+    className: pieceClass(p)
   };
   var draggable = ctrl.data.draggable.current;
   if (draggable.orig === key && (draggable.pos[0] !== 0 || draggable.pos[1] !== 0)) {
@@ -183,7 +184,7 @@ function renderPiece(ctrl, key, p) {
       draggable.pos[0] + draggable.dec[0],
       draggable.pos[1] + draggable.dec[1]
     ]);
-    attrs.class += ' dragging';
+    attrs.className += ' dragging';
   } else if (ctrl.data.animation.current.anims) {
     var animation = ctrl.data.animation.current.anims[key];
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
@@ -194,13 +195,17 @@ function renderPiece(ctrl, key, p) {
   };
 }
 
-function renderCaptured(p) {
-  return {
-    tag: 'div',
-    attrs: {
-      'class': pieceClass(p) + ' fading'
-    }
-  };
+function renderPieceDom(vdom) {
+  var p = document.createElement('div');
+  p.className = vdom.attrs.className;
+  p.style[util.transformProp()] = vdom.attrs.style[util.transformProp()];
+  return p;
+}
+
+function renderCapturedDom(p) {
+  var cap = document.createElement('div');
+  cap.className = pieceClass(p) + ' fading';
+  return cap;
 }
 
 function renderSquare(ctrl, pos, asWhite) {
@@ -211,7 +216,7 @@ function renderSquare(ctrl, pos, asWhite) {
   var bpos = util.boardpos(pos, asWhite);
   var attrs = {
     id: 'cgs-' + key,
-    'class': 'cg-square ' + key,
+    className: 'cg-square ' + key,
     style: {
       left: bpos.left + '%',
       bottom: bpos.bottom + '%'
@@ -240,7 +245,7 @@ function renderMinimalDom(ctrl, asWhite) {
     children.push({
       tag: 'div',
       attrs: {
-        'class': 'cg-square last-move',
+        className: 'cg-square last-move',
         style: {
           left: bpos.left + '%',
           bottom: bpos.bottom + '%'
@@ -258,7 +263,7 @@ function renderMinimalDom(ctrl, asWhite) {
         left: bpos.left + '%',
         bottom: bpos.bottom + '%'
       },
-      'class': pieceClass(ctrl.data.pieces[key])
+      className: pieceClass(ctrl.data.pieces[key])
     };
     children.push({
       tag: 'div',
@@ -315,7 +320,7 @@ function renderBoard(ctrl) {
         };
 
         if (!ctrl.data.minimalDom) {
-          el.parentElement.appendChild(vdom.create(renderCanvas(ctrl.data.bounds)).dom);
+          el.parentElement.appendChild(renderCanvasDom(ctrl.data.bounds));
         }
 
         // set initial ui state
@@ -342,26 +347,20 @@ function renderBoard(ctrl) {
   };
 }
 
-function renderCanvas(bounds) {
-  var style = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    'z-index': 1
-  };
+function renderCanvasDom(bounds) {
+  var c = document.createElement('canvas');
+  var style = c.style;
+  style.position = 'absolute';
+  style.top = 0;
+  style.left = 0;
+  style.zIndex = 1;
   // useful for old devices where canvas is not hardware accelerated thus not
   // composited
   style[util.transformProp()] = 'translateZ(0)';
-
-  return {
-    tag: 'canvas',
-    attrs: {
-      id: 'cg-lights',
-      width: bounds.width,
-      height: bounds.height,
-      style: style
-    }
-  };
+  c.id = CANVASID;
+  c.width = bounds.width;
+  c.height = bounds.height;
+  return c;
 }
 
 function bindEvents(ctrl, el) {
