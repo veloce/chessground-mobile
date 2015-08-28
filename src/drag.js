@@ -4,7 +4,6 @@ var hold = require('./hold');
 
 var originTarget;
 
-// cache access to dom elements
 var draggingPiece;
 
 var scheduledAnimationFrame;
@@ -26,7 +25,6 @@ function renderSquareTarget(data, cur) {
   style.left = (-0.5 * squareWidth) + 'px';
   style.top = (-0.5 * squareWidth) + 'px';
   style[util.transformProp()] = util.translate(vector);
-  sq.style = style;
   sq.className = 'cg-square-target';
   data.element.appendChild(sq);
   return sq;
