@@ -54,7 +54,7 @@
 .cg-square.last-move {
   background-color: rgba(155, 199, 0, 0.41);
 }
-#cg-square-target {
+.cg-square-target {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 50%;
