@@ -57,9 +57,9 @@ function drawCheck(pos, ctx) {
 
 module.exports = {
   squarePos: squarePos,
-  clearSquare,
-  drawSquare,
-  drawPossibleDest,
-  drawPossibleDestOccupied,
-  drawCheck
+  clearSquare: clearSquare,
+  drawSquare: drawSquare,
+  drawPossibleDest: drawPossibleDest,
+  drawPossibleDestOccupied: drawPossibleDestOccupied,
+  drawCheck: drawCheck
 };
