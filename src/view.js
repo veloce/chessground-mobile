@@ -65,8 +65,8 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
     drawLight(ctx, key, asWhite, ctrl, prevState, forceClearSquares);
     // remove previous fading if any when animation is finished
     if (prevFading && !fading) {
-      var fadingPieceEl = squareEl.getElementsByClassName('cg-piece fading').item(0);
-      if (fadingPieceEl) squareEl.removeChild(fadingPieceEl);
+      var fadingPieceEls = squareEl.getElementsByClassName('cg-piece fading');
+      while (fadingPieceEls[0]) squareEl.removeChild(fadingPieceEls[0]);
     }
     // there is a now piece at this square
     if (piece) {
@@ -99,9 +99,9 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
       }
     } // no piece at this square
     else {
-      // remove a piece that was here
+      // remove any piece that was here
       if (prevPiece) {
-        squareEl.removeChild(squareEl.firstChild);
+        while (squareEl.firstChild) squareEl.removeChild(squareEl.firstChild);
       }
     }
   }
