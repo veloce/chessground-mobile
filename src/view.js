@@ -10,7 +10,7 @@ function pieceClass(p) {
 function renderPiece(ctrl, key, p) {
   var attrs = {
     style: {},
-    class: pieceClass(p)
+    className: pieceClass(p)
   };
   var draggable = ctrl.data.draggable.current;
   if (draggable.orig === key && (draggable.pos[0] !== 0 || draggable.pos[1] !== 0)) {
@@ -18,7 +18,7 @@ function renderPiece(ctrl, key, p) {
       draggable.pos[0] + draggable.dec[0],
       draggable.pos[1] + draggable.dec[1]
     ]);
-    attrs.class += ' dragging';
+    attrs.className += ' dragging';
   } else if (ctrl.data.animation.current.anims) {
     var animation = ctrl.data.animation.current.anims[key];
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
@@ -33,7 +33,7 @@ function renderGhost(p) {
   return {
     tag: 'div',
     attrs: {
-      class: pieceClass(p) + ' ghost'
+      className: pieceClass(p) + ' ghost'
     }
   };
 }
@@ -46,14 +46,13 @@ function renderSquare(ctrl, pos, asWhite) {
   var isDragOver = ctrl.data.highlight.dragOver && ctrl.data.draggable.current.over === key;
   var bpos = util.boardpos(pos, asWhite);
   var attrs = {
-    class: 'cg-square ' + key + ' ' + util.classSet({
+    className: 'cg-square ' + key + ' ' + util.classSet({
       'selected': ctrl.data.selected === key,
       'check': ctrl.data.highlight.check && ctrl.data.check === key,
       'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
       'move-dest': (isDragOver || ctrl.data.movable.showDests) && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
       'premove-dest': (isDragOver || ctrl.data.premovable.showDests) && util.containsX(ctrl.data.premovable.dests, key),
       'current-premove': util.contains2(ctrl.data.premovable.current, key),
-      'drag-over': isDragOver,
       'occupied': !!piece,
       'exploding': ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1
     }),
@@ -110,7 +109,7 @@ function renderFading(cfg) {
   return {
     tag: 'div',
     attrs: {
-      class: 'cg-square fading',
+      className: 'cg-square fading',
       style: {
         left: cfg.left,
         bottom: cfg.bottom,
@@ -120,7 +119,7 @@ function renderFading(cfg) {
     children: [{
       tag: 'div',
       attrs: {
-        class: pieceClass(cfg.piece)
+        className: pieceClass(cfg.piece)
       }
     }]
   };
@@ -134,7 +133,7 @@ function renderMinimalDom(ctrl, asWhite) {
     children.push({
       tag: 'div',
       attrs: {
-        class: 'cg-square last-move',
+        className: 'cg-square last-move',
         style: {
           left: bpos.left + '%',
           bottom: bpos.bottom + '%'
@@ -152,7 +151,7 @@ function renderMinimalDom(ctrl, asWhite) {
         left: bpos.left + '%',
         bottom: bpos.bottom + '%'
       },
-      class: pieceClass(ctrl.data.pieces[key]) + ' ' + key
+      className: pieceClass(ctrl.data.pieces[key]) + ' ' + key
     };
     if (ctrl.data.animation.current.anims) {
       var animation = ctrl.data.animation.current.anims[key];
@@ -221,19 +220,22 @@ function renderBoard(ctrl) {
   return {
     tag: 'div',
     attrs: {
-      class: 'cg-board orientation-' + ctrl.data.orientation,
+      className: 'cg-board orientation-' + ctrl.data.orientation,
       config: function(el, isUpdate, context) {
         if (isUpdate) return;
+
+        var scheduledAnimationFrame;
+
         if (!ctrl.data.viewOnly || ctrl.data.drawable.enabled)
           bindEvents(ctrl, el, context);
-        // this function only repaints the board itself.
-        // it's called when dragging or animating pieces,
-        // to prevent the full application embedding chessground
-        // rendering on every animation frame
+
         ctrl.data.render = function() {
+          scheduledAnimationFrame = false;
           m.render(el, renderContent(ctrl));
         };
         ctrl.data.renderRAF = function() {
+          if (scheduledAnimationFrame) return;
+          scheduledAnimationFrame = true;
           util.requestAnimationFrame(ctrl.data.render);
         };
         ctrl.data.bounds = el.getBoundingClientRect();
@@ -265,7 +267,7 @@ module.exports = function(ctrl) {
           }
         });
       },
-      class: [
+      className: [
         'cg-board-wrap',
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
