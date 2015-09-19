@@ -3,17 +3,22 @@ var ctrl = require('./ctrl');
 var view = require('./view');
 var api = require('./api');
 
+function render(element, controller) {
+  m.render(element, view(controller));
+}
+
 // for usage outside of mithril
 function init(element, config) {
 
   var controller = new ctrl(config);
 
-  m.render(element, view(controller));
+  render(element, controller);
 
   return api(controller);
 }
 
 module.exports = init;
+module.exports.render = render;
 module.exports.controller = ctrl;
 module.exports.view = view;
 module.exports.fen = require('./fen');
