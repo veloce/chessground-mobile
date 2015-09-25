@@ -9,10 +9,9 @@ var draggingPiece;
 var scheduledAnimationFrame;
 
 function fixDomAfterDrag(data) {
-  var dp = data.element.querySelector('.cg-piece.dragging');
-  if (dp) {
-    dp.classList.remove('dragging');
-    dp.removeAttribute('style');
+  if (draggingPiece) {
+    draggingPiece.classList.remove('dragging');
+    draggingPiece.removeAttribute('style');
   }
   var sqs = data.element.getElementsByClassName('cg-square-target');
   while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
