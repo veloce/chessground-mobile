@@ -13,8 +13,10 @@ function fixDomAfterDrag(data) {
     draggingPiece.classList.remove('dragging');
     draggingPiece.removeAttribute('style');
   }
-  var sqs = data.element.getElementsByClassName('cg-square-target');
-  while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
+  if (data.element) {
+    var sqs = data.element.getElementsByClassName('cg-square-target');
+    while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
+  }
 }
 
 function start(data, e) {
