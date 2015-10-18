@@ -1,7 +1,6 @@
 var source = require('vinyl-source-stream');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var jshint = require('gulp-jshint');
 var watchify = require('watchify');
 var browserify = require('browserify');
 var uglify = require('gulp-uglify');
@@ -13,12 +12,6 @@ var onError = function(error) {
   gutil.log(gutil.colors.red(error.message));
 };
 var standalone = 'Chessground';
-
-gulp.task('lint', function() {
-  return gulp.src('./src/main.js')
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'));
-});
 
 gulp.task('prod', function() {
   return browserify('./src/main.js', {
