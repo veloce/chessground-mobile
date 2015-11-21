@@ -47,6 +47,9 @@ function start(data, e) {
       squareTarget: null,
       originTarget: e.target
     };
+    if (data.draggable.centerPiece) {
+      data.draggable.current.dec[1] = position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) - (bounds.height * 0.25) / 2);
+    }
     hold.start();
   } else if (hadPremove) board.unsetPremove(data);
   data.renderRAF();
