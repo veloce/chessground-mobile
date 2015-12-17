@@ -2,8 +2,6 @@ var board = require('./board');
 var util = require('./util');
 var hold = require('./hold');
 
-var scheduledAnimationFrame;
-
 function renderSquareTarget(data, cur) {
   var pos = util.key2pos(cur.over),
     width = cur.bounds.width,
@@ -65,7 +63,8 @@ function start(data, e) {
       started: false,
       squareTarget: null,
       draggingPiece: e.target,
-      originTarget: e.target
+      originTarget: e.target,
+      scheduledAnimationFrame: false
     };
     if (data.draggable.centerPiece) {
       data.draggable.current.dec[1] = position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) - (bounds.height * 0.25) / 2);
@@ -77,11 +76,11 @@ function start(data, e) {
 }
 
 function processDrag(data) {
-  if (scheduledAnimationFrame) return;
-  scheduledAnimationFrame = true;
+  if (data.draggable.current.scheduledAnimationFrame) return;
+  data.draggable.current.scheduledAnimationFrame = true;
   requestAnimationFrame(function() {
     var cur = data.draggable.current;
-    scheduledAnimationFrame = false;
+    cur.scheduledAnimationFrame = false;
     if (cur.orig) {
       // cancel animations while dragging
       if (data.animation.current.start &&

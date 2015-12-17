@@ -298,7 +298,7 @@ function renderBoard(ctrl) {
 
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
-        ctrl.data.render = function(resizeFlag) {
+        ctrl.data.render = function(clearLightsFlag) {
           scheduledAnimationFrame = false;
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
@@ -308,7 +308,7 @@ function renderBoard(ctrl) {
               context.prevState = savePrevData(ctrl);
               diffAndRenderBoard(ctrl, context.prevState, true);
             } else {
-              diffAndRenderBoard(ctrl, context.prevState, resizeFlag === 'resize');
+              diffAndRenderBoard(ctrl, context.prevState, clearLightsFlag === 'clear');
               context.prevState = savePrevData(ctrl);
             }
           }
@@ -371,7 +371,7 @@ function bindEvents(ctrl) {
   // no need to debounce: resizable only by orientation change
   var onresize = function() {
     ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-    requestAnimationFrame(ctrl.data.render.bind(undefined, 'resize'));
+    requestAnimationFrame(ctrl.data.render.bind(undefined, 'clear'));
   };
   if (!ctrl.data.viewOnly) {
     document.addEventListener('touchstart', onstart);
