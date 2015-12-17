@@ -20,8 +20,7 @@ module.exports = function(cfg) {
     disableContextMenu: false, // because who needs a context menu on a chessboard
     highlight: {
       lastMove: true, // add last-move class to squares
-      check: true, // add check class to squares
-      dragOver: true // add drag-over class to square when dragging over it
+      check: true // add check class to squares
     },
     animation: {
       enabled: true,

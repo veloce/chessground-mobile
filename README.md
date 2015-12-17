@@ -75,8 +75,7 @@ All options are, well, optional.
   disableContextMenu: false
   highlight: {
     lastMove: true,       // add last-move class to squares
-    check: true,          // add check class to squares
-    dragOver: true        // add drag-over class to square when dragging over it
+    check: true          // add check class to squares
   },
   animation: {
     enabled: true,        // enable piece animations, moving and fading
