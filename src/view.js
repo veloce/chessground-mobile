@@ -3,8 +3,6 @@ var util = require('./util');
 var canvasAPI = require('./canvas');
 var m = require('mithril');
 
-var CANVASID = 'cg-lights';
-
 function savePrevData(ctrl) {
   var cloned = {
     pieces: {},
@@ -47,8 +45,6 @@ function savePrevData(ctrl) {
 function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var canvas = document.getElementById(CANVASID);
-  var ctx = canvas.getContext('2d');
   var asWhite = ctrl.data.orientation === 'white';
   var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, anim, prevAnim;
   var anims = ctrl.data.animation.current.anims;
@@ -62,7 +58,7 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
     prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
     // draw highlights
-    drawLight(ctx, key, asWhite, ctrl, prevState, forceClearSquares);
+    drawLight(ctrl.canvasCtx, key, asWhite, ctrl, prevState, forceClearSquares);
     // remove previous fading if any when animation is finished
     if (prevFading && !fading) {
       var fadingPieceEls = squareEl.getElementsByClassName('cg-piece fading');
@@ -322,6 +318,8 @@ function renderBoard(ctrl) {
         if (!ctrl.data.minimalDom) {
           el.parentElement.appendChild(renderCanvasDom(ctrl.data.bounds));
         }
+        ctrl.canvas = document.getElementById(util.CANVASID);
+        ctrl.canvasCtx = ctrl.canvas.getContext('2d');
 
         // set initial ui state
         context.prevState = {
@@ -357,7 +355,7 @@ function renderCanvasDom(bounds) {
   // useful for old devices where canvas is not hardware accelerated thus not
   // composited
   style[util.transformProp()] = 'translateZ(0)';
-  c.id = CANVASID;
+  c.id = util.CANVASID;
   c.width = bounds.width;
   c.height = bounds.height;
   return c;

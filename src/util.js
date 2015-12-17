@@ -1,4 +1,4 @@
-var files = "abcdefgh".split('');
+var files = 'abcdefgh'.split('');
 var ranks = [1, 2, 3, 4, 5, 6, 7, 8];
 var invRanks = [8, 7, 6, 5, 4, 3, 2, 1];
 
@@ -118,5 +118,6 @@ module.exports = {
   partialApply: partialApply,
   partial: partial,
   transformProp: transformProp,
-  isRightButton: isRightButton
+  isRightButton: isRightButton,
+  CANVASID: 'cg-lights'
 };
