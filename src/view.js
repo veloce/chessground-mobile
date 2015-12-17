@@ -110,17 +110,17 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
 function drawLight(ctx, key, asWhite, ctrl, prevState, forceClear) {
   var data = ctrl.data;
   var occupied = !!data.pieces[key];
-  var isMoveDest = data.selected && util.containsX(data.movable.dests[data.selected], key);
+  var isMoveDest = data.movable.showDests && data.selected && util.containsX(data.movable.dests[data.selected], key);
   var wasMoveDest = prevState.selected && util.containsX(prevState.dests[prevState.selected], key);
   var isSelected = key === data.selected;
   var wasSelected = key === prevState.selected;
-  var isLastMove = util.contains2(data.lastMove, key);
+  var isLastMove = data.highlight.lastMove && util.contains2(data.lastMove, key);
   var wasLastMove = util.contains2(prevState.lastMove, key);
-  var isCheck = data.check === key;
+  var isCheck = data.highlight.check && data.check === key;
   var wasCheck = prevState.check === key;
   var isPremove = util.contains2(data.premovable.current, key);
   var wasPremove = util.contains2(prevState.premove, key);
-  var isPremoveDest = data.selected && util.containsX(data.premovable.dests, key);
+  var isPremoveDest = data.premovable.showDests && data.selected && util.containsX(data.premovable.dests, key);
   var wasPremoveDest = prevState.selected && util.containsX(prevState.premoveDests, key);
   var isExploding = ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1;
   var wasExploding = prevState.exploding && prevState.exploding.indexOf(key) !== -1;
@@ -363,7 +363,7 @@ function renderCanvasDom(bounds) {
   return c;
 }
 
-function bindEvents(ctrl, el) {
+function bindEvents(ctrl) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
@@ -374,10 +374,10 @@ function bindEvents(ctrl, el) {
     requestAnimationFrame(ctrl.data.render.bind(undefined, 'resize'));
   };
   if (!ctrl.data.viewOnly) {
-    el.addEventListener('touchstart', onstart);
-    el.addEventListener('touchmove', onmove);
-    el.addEventListener('touchend', onend);
-    el.addEventListener('touchcancel', oncancel);
+    document.addEventListener('touchstart', onstart);
+    document.addEventListener('touchmove', onmove);
+    document.addEventListener('touchend', onend);
+    document.addEventListener('touchcancel', oncancel);
   }
   window.addEventListener('resize', onresize);
 }

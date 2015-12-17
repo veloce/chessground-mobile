@@ -2,10 +2,6 @@ var board = require('./board');
 var util = require('./util');
 var hold = require('./hold');
 
-var originTarget;
-
-var draggingPiece;
-
 var scheduledAnimationFrame;
 
 function renderSquareTarget(data, cur) {
@@ -45,7 +41,6 @@ function start(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
   e.stopPropagation();
   e.preventDefault();
-  originTarget = e.target;
   var previouslySelected = data.selected;
   var position = util.eventPosition(e);
   var bounds = data.bounds;
@@ -68,13 +63,17 @@ function start(data, e) {
       ],
       bounds: bounds,
       started: false,
-      squareTarget: null
+      squareTarget: null,
+      draggingPiece: e.target,
+      originTarget: e.target
     };
-    draggingPiece = data.element.querySelector('.' + data.draggable.current.orig + ' > .cg-piece');
+    if (data.draggable.centerPiece) {
+      data.draggable.current.dec[1] = position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) - (bounds.height * 0.25) / 2);
+    }
     hold.start();
   } else if (hadPremove) board.unsetPremove(data);
-  processDrag(data);
   data.renderRAF();
+  processDrag(data);
 }
 
 function processDrag(data) {
@@ -94,7 +93,7 @@ function processDrag(data) {
       else {
         if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
           cur.started = true;
-          draggingPiece.classList.add('dragging');
+          cur.draggingPiece.classList.add('dragging');
         }
         if (cur.started) {
           cur.pos = [
@@ -111,7 +110,7 @@ function processDrag(data) {
           }
 
           // move piece
-          draggingPiece.style[util.transformProp()] = util.translate([
+          cur.draggingPiece.style[util.transformProp()] = util.translate([
             cur.pos[0] + cur.dec[0],
             cur.pos[1] + cur.dec[1]
           ]);
@@ -130,17 +129,16 @@ function processDrag(data) {
           }
         }
       }
+      processDrag(data);
     }
   });
 }
-
 
 function move(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
 
   if (data.draggable.current.orig) {
     data.draggable.current.epos = util.eventPosition(e);
-    processDrag(data);
   }
 }
 
@@ -152,7 +150,7 @@ function end(data, e) {
   if (!orig) return;
   // comparing with the origin target is an easy way to test that the end event
   // has the same touch origin
-  if (e && e.type === "touchend" && originTarget !== e.target) return;
+  if (e && e.type === 'touchend' && draggable.current.originTarget !== e.target) return;
   board.unsetPremove(data);
   if (draggable.current.started) {
     dest = draggable.current.over;
