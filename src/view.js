@@ -361,7 +361,7 @@ function renderCanvasDom(bounds) {
   return c;
 }
 
-function bindEvents(ctrl) {
+function bindEvents(ctrl, el) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
@@ -372,10 +372,10 @@ function bindEvents(ctrl) {
     requestAnimationFrame(ctrl.data.render.bind(undefined, 'clear'));
   };
   if (!ctrl.data.viewOnly) {
-    document.addEventListener('touchstart', onstart);
-    document.addEventListener('touchmove', onmove);
-    document.addEventListener('touchend', onend);
-    document.addEventListener('touchcancel', oncancel);
+    el.addEventListener('touchstart', onstart);
+    el.addEventListener('touchmove', onmove);
+    el.addEventListener('touchend', onend);
+    el.addEventListener('touchcancel', oncancel);
   }
   window.addEventListener('resize', onresize);
 }
