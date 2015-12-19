@@ -317,9 +317,9 @@ function renderBoard(ctrl) {
 
         if (!ctrl.data.minimalDom) {
           el.parentElement.appendChild(renderCanvasDom(ctrl.data.bounds));
+          ctrl.canvas = document.getElementById(util.CANVASID);
+          ctrl.canvasCtx = ctrl.canvas.getContext('2d');
         }
-        ctrl.canvas = document.getElementById(util.CANVASID);
-        ctrl.canvasCtx = ctrl.canvas.getContext('2d');
 
         // set initial ui state
         context.prevState = {
