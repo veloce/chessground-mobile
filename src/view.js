@@ -226,12 +226,35 @@ function renderContent(ctrl) {
   return children;
 }
 
+function bindEvents(ctrl, el) {
+  var onstart = drag.start.bind(undefined, ctrl.data);
+  var onmove = drag.move.bind(undefined, ctrl.data);
+  var onend = drag.end.bind(undefined, ctrl.data);
+  var oncancel = drag.cancel.bind(undefined, ctrl.data);
+  // no need to debounce: resizable only by orientation change
+  var onresize = function() {
+    ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
+    requestAnimationFrame(ctrl.data.render);
+  };
+  if (!ctrl.data.viewOnly) {
+    el.addEventListener('touchstart', onstart);
+    el.addEventListener('touchmove', onmove);
+    el.addEventListener('touchend', onend);
+    el.addEventListener('touchcancel', oncancel);
+  }
+  window.addEventListener('resize', onresize);
+}
+
 function renderBoard(ctrl) {
   return {
     tag: 'div',
     attrs: {
       id: 'cg-board',
-      className: 'cg-board orientation-' + ctrl.data.orientation,
+      className: [
+        'cg-board orientation-' + ctrl.data.orientation,
+        ctrl.data.viewOnly ? 'view-only' : 'manipulable',
+        ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
+      ].join(' '),
       config: function(el, isUpdate, context) {
         if (isUpdate) return;
 
@@ -284,39 +307,4 @@ function renderBoard(ctrl) {
   };
 }
 
-function bindEvents(ctrl, el) {
-  var onstart = drag.start.bind(undefined, ctrl.data);
-  var onmove = drag.move.bind(undefined, ctrl.data);
-  var onend = drag.end.bind(undefined, ctrl.data);
-  var oncancel = drag.cancel.bind(undefined, ctrl.data);
-  // no need to debounce: resizable only by orientation change
-  var onresize = function() {
-    ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-    requestAnimationFrame(ctrl.data.render);
-  };
-  if (!ctrl.data.viewOnly) {
-    el.addEventListener('touchstart', onstart);
-    el.addEventListener('touchmove', onmove);
-    el.addEventListener('touchend', onend);
-    el.addEventListener('touchcancel', oncancel);
-  }
-  window.addEventListener('resize', onresize);
-}
-
-function view(ctrl) {
-  return {
-    tag: 'div',
-    attrs: {
-      className: [
-        'cg-board-wrap',
-        ctrl.data.viewOnly ? 'view-only' : 'manipulable',
-        ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
-      ].join(' ')
-    },
-    children: [
-      renderBoard(ctrl)
-    ]
-  };
-}
-
-module.exports = view;
+module.exports = renderBoard;

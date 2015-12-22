@@ -1,13 +1,13 @@
 /*
  * Board
  */
-.blue .cg-board {
+.blue > .cg-board {
   background-image: url('images/board/blue2.jpg');
 }
-.wood .cg-board {
+.wood > .cg-board {
   background-image: url('images/board/wood2.jpg');
 }
-.marble .cg-board {
+.marble > .cg-board {
   background-image: url('images/board/marble.jpg');
 }
 
