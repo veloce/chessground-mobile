@@ -3,6 +3,8 @@ var util = require('./util');
 var canvasAPI = require('./canvas');
 var m = require('mithril');
 
+var CANVASID = 'cg-lights';
+
 function savePrevData(ctrl) {
   var cloned = {
     pieces: {},
@@ -317,7 +319,7 @@ function renderBoard(ctrl) {
 
         if (!ctrl.data.minimalDom) {
           el.parentElement.appendChild(renderCanvasDom(ctrl.data.bounds));
-          ctrl.canvas = document.getElementById(util.CANVASID);
+          ctrl.canvas = document.getElementById(CANVASID);
           ctrl.canvasCtx = ctrl.canvas.getContext('2d');
         }
 
@@ -355,7 +357,7 @@ function renderCanvasDom(bounds) {
   // useful for old devices where canvas is not hardware accelerated thus not
   // composited
   style[util.transformProp()] = 'translateZ(0)';
-  c.id = util.CANVASID;
+  c.id = CANVASID;
   c.width = bounds.width;
   c.height = bounds.height;
   return c;

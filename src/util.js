@@ -118,6 +118,5 @@ module.exports = {
   partialApply: partialApply,
   partial: partial,
   transformProp: transformProp,
-  isRightButton: isRightButton,
-  CANVASID: 'cg-lights'
+  isRightButton: isRightButton
 };

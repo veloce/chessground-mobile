@@ -3,17 +3,9 @@ var data = require('./data');
 var fen = require('./fen');
 var configure = require('./configure');
 var anim = require('./anim');
-var util = require('./util');
 var drag = require('./drag');
 
 function controller(cfg) {
-
-  // what an ugly hack... but it will work until I find something better...
-  var canvas = document.getElementById(util.CANVASID);
-  if (canvas) {
-    var context = canvas.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
-  }
 
   this.data = data(cfg);
 
