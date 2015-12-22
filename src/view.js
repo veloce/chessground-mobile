@@ -1,9 +1,6 @@
 var drag = require('./drag');
 var util = require('./util');
-var canvasAPI = require('./canvas');
 var m = require('mithril');
-
-var CANVASID = 'cg-lights';
 
 function savePrevData(ctrl) {
   var cloned = {
@@ -44,11 +41,10 @@ function savePrevData(ctrl) {
   return cloned;
 }
 
-function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
+function diffAndRenderBoard(ctrl, prevState) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var asWhite = ctrl.data.orientation === 'white';
-  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, anim, prevAnim;
+  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, squareClass, anim, prevAnim;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
@@ -59,8 +55,17 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
     fading = fadings && fadings[key];
     prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
-    // draw highlights
-    drawLight(ctrl.canvasCtx, key, asWhite, ctrl, prevState, forceClearSquares);
+    squareClass = 'cg-square ' + key + ' ' + util.classSet({
+      'selected': ctrl.data.selected === key,
+      'check': ctrl.data.highlight.check && ctrl.data.check === key,
+      'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
+      'move-dest': ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
+      'premove-dest': ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key),
+      'current-premove': util.contains2(ctrl.data.premovable.current, key),
+      'occupied': !!piece
+    });
+    if (squareEl.className !== squareClass) squareEl.className = squareClass;
+
     // remove previous fading if any when animation is finished
     if (prevFading && !fading) {
       var fadingPieceEls = squareEl.getElementsByClassName('cg-piece fading');
@@ -101,68 +106,6 @@ function diffAndRenderBoard(ctrl, prevState, forceClearSquares) {
       if (prevPiece) {
         while (squareEl.firstChild) squareEl.removeChild(squareEl.firstChild);
       }
-    }
-  }
-}
-
-function drawLight(ctx, key, asWhite, ctrl, prevState, forceClear) {
-  var data = ctrl.data;
-  var occupied = !!data.pieces[key];
-  var isMoveDest = data.movable.showDests && data.selected && util.containsX(data.movable.dests[data.selected], key);
-  var wasMoveDest = prevState.selected && util.containsX(prevState.dests[prevState.selected], key);
-  var isSelected = key === data.selected;
-  var wasSelected = key === prevState.selected;
-  var isLastMove = data.highlight.lastMove && util.contains2(data.lastMove, key);
-  var wasLastMove = util.contains2(prevState.lastMove, key);
-  var isCheck = data.highlight.check && data.check === key;
-  var wasCheck = prevState.check === key;
-  var isPremove = util.contains2(data.premovable.current, key);
-  var wasPremove = util.contains2(prevState.premove, key);
-  var isPremoveDest = data.premovable.showDests && data.selected && util.containsX(data.premovable.dests, key);
-  var wasPremoveDest = prevState.selected && util.containsX(prevState.premoveDests, key);
-  var isExploding = ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1;
-  var wasExploding = prevState.exploding && prevState.exploding.indexOf(key) !== -1;
-
-  var pos;
-
-  // clear any prev light
-  if (wasSelected || wasMoveDest || wasLastMove || wasCheck || wasPremove ||
-    wasPremoveDest || wasExploding || forceClear) {
-    pos = canvasAPI.squarePos(key, data.bounds, asWhite);
-    canvasAPI.clearSquare(pos, ctx);
-  }
-
-  // draw new light
-  if (isSelected || isMoveDest || isLastMove || isPremove || isPremoveDest ||
-    isCheck || isExploding) {
-    pos = pos || canvasAPI.squarePos(key, data.bounds, asWhite);
-
-    if (isSelected) {
-      canvasAPI.drawSquare(pos, data.colors.selected, ctx);
-    }
-    else if (isMoveDest) {
-      if (occupied)
-        canvasAPI.drawPossibleDestOccupied(pos, data.colors.moveDest, ctx);
-      else
-        canvasAPI.drawPossibleDest(pos, data.colors.moveDest, ctx);
-    }
-    else if (isPremoveDest) {
-      if (occupied)
-        canvasAPI.drawPossibleDestOccupied(pos, data.colors.premoveDest, ctx);
-      else
-        canvasAPI.drawPossibleDest(pos, data.colors.premoveDest, ctx);
-    }
-    else if (isPremove) {
-      canvasAPI.drawSquare(pos, data.colors.premove, ctx);
-    }
-    else if (isLastMove) {
-      canvasAPI.drawSquare(pos, data.colors.lastMove, ctx);
-    }
-    else if (isCheck) {
-      canvasAPI.drawCheck(pos, ctx);
-    }
-    if (isExploding) {
-      canvasAPI.drawSquare(pos, data.colors.exploding, ctx);
     }
   }
 }
@@ -296,7 +239,7 @@ function renderBoard(ctrl) {
 
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
-        ctrl.data.render = function(clearLightsFlag) {
+        ctrl.data.render = function() {
           scheduledAnimationFrame = false;
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
@@ -304,9 +247,9 @@ function renderBoard(ctrl) {
             if (context.prevState.orientation !== ctrl.data.orientation) {
               m.render(el, renderContent(ctrl), true);
               context.prevState = savePrevData(ctrl);
-              diffAndRenderBoard(ctrl, context.prevState, true);
+              diffAndRenderBoard(ctrl, context.prevState);
             } else {
-              diffAndRenderBoard(ctrl, context.prevState, clearLightsFlag === 'clear');
+              diffAndRenderBoard(ctrl, context.prevState);
               context.prevState = savePrevData(ctrl);
             }
           }
@@ -316,12 +259,6 @@ function renderBoard(ctrl) {
           scheduledAnimationFrame = true;
           requestAnimationFrame(ctrl.data.render);
         };
-
-        if (!ctrl.data.minimalDom) {
-          el.parentElement.appendChild(renderCanvasDom(ctrl.data.bounds));
-          ctrl.canvas = document.getElementById(CANVASID);
-          ctrl.canvasCtx = ctrl.canvas.getContext('2d');
-        }
 
         // set initial ui state
         context.prevState = {
@@ -347,22 +284,6 @@ function renderBoard(ctrl) {
   };
 }
 
-function renderCanvasDom(bounds) {
-  var c = document.createElement('canvas');
-  var style = c.style;
-  style.position = 'absolute';
-  style.top = 0;
-  style.left = 0;
-  style.zIndex = 1;
-  // useful for old devices where canvas is not hardware accelerated thus not
-  // composited
-  style[util.transformProp()] = 'translateZ(0)';
-  c.id = CANVASID;
-  c.width = bounds.width;
-  c.height = bounds.height;
-  return c;
-}
-
 function bindEvents(ctrl, el) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
@@ -371,7 +292,7 @@ function bindEvents(ctrl, el) {
   // no need to debounce: resizable only by orientation change
   var onresize = function() {
     ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-    requestAnimationFrame(ctrl.data.render.bind(undefined, 'clear'));
+    requestAnimationFrame(ctrl.data.render);
   };
   if (!ctrl.data.viewOnly) {
     el.addEventListener('touchstart', onstart);
