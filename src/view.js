@@ -235,7 +235,6 @@ function bindEvents(ctrl, el, context) {
   // no need to debounce: resizable only by orientation change
   var onresize = function() {
     ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-    requestAnimationFrame(ctrl.data.render);
   };
   if (!ctrl.data.viewOnly) {
     el.addEventListener('touchstart', onstart);
