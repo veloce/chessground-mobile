@@ -62,7 +62,8 @@ function diffAndRenderBoard(ctrl, prevState) {
       'move-dest': ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
       'premove-dest': ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key),
       'current-premove': util.contains2(ctrl.data.premovable.current, key),
-      'occupied': !!piece
+      'occupied': !!piece,
+      'exploding': ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1
     });
     if (squareEl.className !== squareClass) squareEl.className = squareClass;
 
