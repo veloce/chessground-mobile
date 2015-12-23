@@ -227,7 +227,7 @@ function renderContent(ctrl) {
   return children;
 }
 
-function bindEvents(ctrl, el) {
+function bindEvents(ctrl, el, context) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
@@ -244,6 +244,9 @@ function bindEvents(ctrl, el) {
     el.addEventListener('touchcancel', oncancel);
   }
   window.addEventListener('resize', onresize);
+  context.onunload = function() {
+    window.removeEventListener('resize', onresize);
+  };
 }
 
 function renderBoard(ctrl) {
