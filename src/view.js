@@ -7,14 +7,7 @@ function savePrevData(ctrl) {
     pieces: {},
     fadings: {},
     anims: {},
-    orientation: '',
-    selected: null,
-    check: null,
-    lastMove: null,
-    dests: [],
-    premove: null,
-    premoveDests: [],
-    exploding: []
+    orientation: ''
   };
   var currAnim = ctrl.data.animation.current;
   var pK = ctrl.data.pieces ? Object.keys(ctrl.data.pieces) : [];
@@ -29,14 +22,7 @@ function savePrevData(ctrl) {
   for (var k = 0, klen = fK.length; k < klen; k++) {
     cloned.fadings[fK[k]] = ctrl.data.animation.current.fadings[fK[k]];
   }
-  cloned.dests = ctrl.data.movable.dests;
-  cloned.selected = ctrl.data.selected;
-  cloned.lastMove = ctrl.data.lastMove;
-  cloned.check = ctrl.data.check;
   cloned.orientation = ctrl.data.orientation;
-  cloned.premove = ctrl.data.premovable.current;
-  cloned.premoveDests = ctrl.data.premovable.dests;
-  cloned.exploding = ctrl.vm.exploding;
 
   return cloned;
 }
@@ -291,14 +277,7 @@ function renderBoard(ctrl) {
           pieces: ctrl.data.pieces,
           fadings: {},
           anims: {},
-          orientation: ctrl.data.orientation,
-          selected: null,
-          check: null,
-          lastMove: null,
-          dests: [],
-          premove: null,
-          premoveDests: [],
-          exploding: []
+          orientation: ctrl.data.orientation
         };
 
         ctrl.data.render();
