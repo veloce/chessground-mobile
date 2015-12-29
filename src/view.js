@@ -30,7 +30,7 @@ function savePrevData(ctrl) {
 function diffAndRenderBoard(ctrl, prevState) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, squareClass, anim, prevAnim;
+  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, sqClass, anim, prevAnim;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
@@ -41,17 +41,8 @@ function diffAndRenderBoard(ctrl, prevState) {
     fading = fadings && fadings[key];
     prevFading = prevState.fadings[key];
     squareEl = document.getElementById('cgs-' + key);
-    squareClass = 'cg-square ' + key + ' ' + util.classSet({
-      'selected': ctrl.data.selected === key,
-      'check': ctrl.data.highlight.check && ctrl.data.check === key,
-      'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
-      'move-dest': ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
-      'premove-dest': ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key),
-      'current-premove': util.contains2(ctrl.data.premovable.current, key),
-      'occupied': !!piece,
-      'exploding': ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1
-    });
-    if (squareEl.className !== squareClass) squareEl.className = squareClass;
+    sqClass = squareClass(ctrl, key, piece);
+    if (squareEl.className !== sqClass) squareEl.className = sqClass;
 
     // remove previous fading if any when animation is finished
     if (prevFading && !fading) {
@@ -136,6 +127,19 @@ function renderCapturedDom(p) {
   return cap;
 }
 
+function squareClass(ctrl, key, piece) {
+  return 'cg-square ' + key + ' ' + util.classSet({
+    'selected': ctrl.data.selected === key,
+    'check': ctrl.data.highlight.check && ctrl.data.check === key,
+    'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
+    'move-dest': ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
+    'premove-dest': ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key),
+    'current-premove': util.contains2(ctrl.data.premovable.current, key),
+    'occupied': !!piece,
+    'exploding': ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1
+  });
+}
+
 function renderSquare(ctrl, pos, asWhite) {
   var file = util.files[pos[0] - 1];
   var rank = pos[1];
@@ -144,7 +148,7 @@ function renderSquare(ctrl, pos, asWhite) {
   var bpos = util.boardpos(pos, asWhite);
   var attrs = {
     id: 'cgs-' + key,
-    className: 'cg-square ' + key,
+    className: squareClass(ctrl, key, piece),
     style: {
       left: bpos.left + '%',
       bottom: bpos.bottom + '%'
