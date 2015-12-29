@@ -76,7 +76,6 @@ module.exports = function(cfg) {
       distance: 3, // minimum distance to initiate a drag, in pixels
       squareTarget: true, // display a shadow target under piece
       centerPiece: false, // center the piece under finger (otherwise shifted up)
-      showGhost: true, // show ghost of piece being dragged
       /*{ // current
        *  orig: "a2", // orig key of dragging piece
        *  rel: [100, 170] // x, y of the piece at original position
@@ -96,14 +95,6 @@ module.exports = function(cfg) {
       move: function(orig, dest, capturedPiece) {},
       capture: function(key, piece) {}, // DEPRECATED called when a piece has been captured
       select: function(key) {} // called when a square is selected
-    },
-    colors: {
-      selected: 'rgba(216, 85, 0, 0.3)',
-      moveDest: 'rgba(20,85,30,0.4)',
-      lastMove: 'rgba(155, 199, 0, 0.3)',
-      premove: 'rgba(20, 30, 85, 0.3)',
-      premoveDest: 'rgba(20, 30, 85, 0.4)',
-      exploding: 'rgba(255, 0, 0, 0.5)'
     }
   };
 
