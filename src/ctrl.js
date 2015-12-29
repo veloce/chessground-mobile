@@ -59,10 +59,15 @@ function controller(cfg) {
       this.data.bounds = this.data.element.getBoundingClientRect();
     }
   }.bind(this);
-  window.addEventListener('resize', onresize);
+
+  if (!this.data.viewOnly) {
+    window.addEventListener('resize', onresize);
+  }
 
   this.onunload = function() {
-    window.removeEventListener('resize', onresize);
+    if (!this.data.viewOnly) {
+      window.removeEventListener('resize', onresize);
+    }
   };
 }
 
