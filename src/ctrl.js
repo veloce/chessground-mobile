@@ -52,6 +52,18 @@ function controller(cfg) {
       this.data.renderRAF();
     }.bind(this), 200);
   }.bind(this);
+
+  // no need to debounce: resizable only by orientation change
+  var onresize = function() {
+    if (this.data.element) {
+      this.data.bounds = this.data.element.getBoundingClientRect();
+    }
+  }.bind(this);
+  window.addEventListener('resize', onresize);
+
+  this.onunload = function() {
+    window.removeEventListener('resize', onresize);
+  };
 }
 
 module.exports = controller;

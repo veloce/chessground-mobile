@@ -217,25 +217,17 @@ function renderContent(ctrl) {
   return children;
 }
 
-function bindEvents(ctrl, el, context) {
+function bindEvents(ctrl, el) {
   var onstart = drag.start.bind(undefined, ctrl.data);
   var onmove = drag.move.bind(undefined, ctrl.data);
   var onend = drag.end.bind(undefined, ctrl.data);
   var oncancel = drag.cancel.bind(undefined, ctrl.data);
-  // no need to debounce: resizable only by orientation change
-  var onresize = function() {
-    ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-  };
   if (!ctrl.data.viewOnly) {
     el.addEventListener('touchstart', onstart);
     el.addEventListener('touchmove', onmove);
     el.addEventListener('touchend', onend);
     el.addEventListener('touchcancel', oncancel);
   }
-  window.addEventListener('resize', onresize);
-  context.onunload = function() {
-    window.removeEventListener('resize', onresize);
-  };
 }
 
 function renderBoard(ctrl) {
@@ -286,7 +278,7 @@ function renderBoard(ctrl) {
 
         ctrl.data.render();
 
-        bindEvents(ctrl, el, context);
+        bindEvents(ctrl, el);
       }
     },
     children: renderContent(ctrl)
