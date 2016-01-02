@@ -240,14 +240,6 @@ function renderBoard(ctrl) {
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
         ctrl.data.render();
-        var onresize = function() {
-          ctrl.data.bounds = ctrl.data.element.getBoundingClientRect();
-        };
-        // intended for mobile only since resize calls are not debounced
-        window.addEventListener('resize', onresize);
-        context.onunload = function() {
-          window.removeEventListener('resize', onresize);
-        };
       }
     },
     children: []
