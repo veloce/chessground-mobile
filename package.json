@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "merge": "1.2.0",
-    "mithril": "ornicar/mithril.js#next"
+    "mithril": "lhorie/mithril.js#next"
   },
   "devDependencies": {
     "browserify": "~9.0.8",
