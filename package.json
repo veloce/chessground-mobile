@@ -1,5 +1,5 @@
 {
-  "name": "chessground",
+  "name": "chessground-mobile",
   "version": "2.1.0",
   "description": "lichess.org Chess UI",
   "main": "src/main.js",
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "merge": "1.2.0",
-    "mithril": "ornicar/mithril.js#v8-opt"
+    "mithril": "ornicar/mithril.js#next"
   },
   "devDependencies": {
     "browserify": "~9.0.8",
