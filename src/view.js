@@ -42,6 +42,14 @@ function diffAndRenderBoard(ctrl, prevState) {
     prevFading = prevState.fadings[key];
     squareEl = ctrl.data.squareEls[key];
     sqClass = squareClass(ctrl, key, piece);
+
+    // should not happen
+    if (squareEl === undefined || squareEl === null) {
+      console.log('Chessground: attempt to diff against unexisting square element ' + key);
+      return;
+    }
+
+    // update highlights
     if (squareEl.className !== sqClass) squareEl.className = sqClass;
 
     // remove previous fading if any when animation is finished
@@ -66,17 +74,33 @@ function diffAndRenderBoard(ctrl, prevState) {
         } else {
           // different pieces: remove old piece and put new one
           pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-          squareEl.replaceChild(pieceEl, squareEl.firstChild);
+          if (squareEl.firstChild && squareEl.firstChild.nodeType) {
+            squareEl.replaceChild(pieceEl, squareEl.firstChild);
+          } else {
+            squareEl.appendChild(pieceEl);
+            console.log('Chessground: failed attempt to replace child on square ' + key);
+          }
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
-          if (fading && !prevFading)
-            squareEl.appendChild(renderCapturedDom(fading));
+          if (fading && !prevFading) {
+            if (squareEl.firstChild && squareEl.firstChild.nodeType) {
+              squareEl.replaceChild(renderCapturedDom(fading), squareEl.firstChild);
+              console.log('Chessground: this square should not have a child ' + key);
+            } else {
+              squareEl.appendChild(renderCapturedDom(fading));
+            }
+          }
         }
       } // empty square before: just put the piece
       else {
         pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-        squareEl.appendChild(pieceEl);
+        if (squareEl.firstChild && squareEl.firstChild.nodeType) {
+          squareEl.replaceChild(pieceEl, squareEl.firstChild);
+          console.log('Chessground: this square should not have a child ' + key);
+        } else {
+          squareEl.appendChild(pieceEl);
+        }
       }
     } // no piece at this square
     else {
