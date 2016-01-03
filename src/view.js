@@ -84,12 +84,7 @@ function diffAndRenderBoard(ctrl, prevState) {
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
           if (fading && !prevFading) {
-            if (squareEl.firstChild && squareEl.firstChild.nodeType) {
-              squareEl.replaceChild(renderCapturedDom(fading), squareEl.firstChild);
-              console.log('Chessground: this square should not have a child ' + key);
-            } else {
-              squareEl.appendChild(renderCapturedDom(fading));
-            }
+            squareEl.appendChild(renderCapturedDom(fading));
           }
         }
       } // empty square before: just put the piece
