@@ -40,7 +40,7 @@ function diffAndRenderBoard(ctrl, prevState) {
     prevAnim = prevState.anims[key];
     fading = fadings && fadings[key];
     prevFading = prevState.fadings[key];
-    squareEl = document.getElementById('cgs-' + key);
+    squareEl = ctrl.data.squareEls[key];
     sqClass = squareClass(ctrl, key, piece);
     if (squareEl.className !== sqClass) squareEl.className = sqClass;
 
@@ -147,11 +147,15 @@ function renderSquare(ctrl, pos, asWhite) {
   var piece = ctrl.data.pieces[key];
   var bpos = util.boardpos(pos, asWhite);
   var attrs = {
-    id: 'cgs-' + key,
     className: squareClass(ctrl, key, piece),
     style: {
       left: bpos.left + '%',
       bottom: bpos.bottom + '%'
+    },
+    config: function(el, isUpdate) {
+      if (!isUpdate) {
+        ctrl.data.squareEls[key] = el;
+      }
     }
   };
   var children = [];
@@ -240,7 +244,7 @@ function renderBoard(ctrl) {
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
       ].join(' '),
-      config: function(el, isUpdate, context) {
+      config: function(el, isUpdate) {
         if (isUpdate) return;
 
         var scheduledAnimationFrame;
@@ -252,13 +256,13 @@ function renderBoard(ctrl) {
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
-            if (context.prevState.orientation !== ctrl.data.orientation) {
+            if (ctrl.data.prevState.orientation !== ctrl.data.orientation) {
               m.render(el, renderContent(ctrl), true);
-              context.prevState = savePrevData(ctrl);
-              diffAndRenderBoard(ctrl, context.prevState);
+              ctrl.data.prevState = savePrevData(ctrl);
+              diffAndRenderBoard(ctrl, ctrl.data.prevState);
             } else {
-              diffAndRenderBoard(ctrl, context.prevState);
-              context.prevState = savePrevData(ctrl);
+              diffAndRenderBoard(ctrl, ctrl.data.prevState);
+              ctrl.data.prevState = savePrevData(ctrl);
             }
           }
         };
@@ -269,7 +273,7 @@ function renderBoard(ctrl) {
         };
 
         // set initial ui state
-        context.prevState = {
+        ctrl.data.prevState = {
           pieces: ctrl.data.pieces,
           fadings: {},
           anims: {},
