@@ -25,13 +25,15 @@ function renderSquareTarget(data, cur) {
 }
 
 function fixDomAfterDrag(data) {
-  var dp = data.element.querySelector('.cg-piece.dragging');
-  if (dp) {
-    dp.classList.remove('dragging');
-    dp.removeAttribute('style');
+  if (data.element) {
+    var dp = data.element.querySelector('.cg-piece.dragging');
+    if (dp) {
+      dp.classList.remove('dragging');
+      dp.removeAttribute('style');
+    }
+    var sqs = data.element.getElementsByClassName('cg-square-target');
+    while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
   }
-  var sqs = data.element.getElementsByClassName('cg-square-target');
-  while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
 }
 
 function start(data, e) {
@@ -145,7 +147,7 @@ function end(data, e) {
   var draggable = data.draggable;
   var orig = draggable.current ? draggable.current.orig : null;
   var dest;
-  requestAnimationFrame(fixDomAfterDrag.bind(undefined, data));
+  fixDomAfterDrag(data);
   if (!orig) return;
   // comparing with the origin target is an easy way to test that the end event
   // has the same touch origin
@@ -163,7 +165,7 @@ function end(data, e) {
 }
 
 function cancel(data) {
-  requestAnimationFrame(fixDomAfterDrag.bind(undefined, data));
+  fixDomAfterDrag(data);
   if (data.draggable.current.orig) {
     data.draggable.current = {};
     board.selectSquare(data, null);
