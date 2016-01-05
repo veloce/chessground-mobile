@@ -3,10 +3,6 @@ var premove = require('./premove');
 var anim = require('./anim');
 var hold = require('./hold');
 
-function callUserFunction(f) {
-  setTimeout(f, 1);
-}
-
 function toggleOrientation(data) {
   data.orientation = util.opposite(data.orientation);
 }
@@ -34,13 +30,13 @@ function setCheck(data, color) {
 
 function setPremove(data, orig, dest) {
   data.premovable.current = [orig, dest];
-  callUserFunction(data.premovable.events.set.bind(undefined, orig, dest));
+  setTimeout(data.premovable.events.set.bind(undefined, orig, dest));
 }
 
 function unsetPremove(data) {
   if (data.premovable.current) {
     data.premovable.current = null;
-    callUserFunction(data.premovable.events.unset);
+    setTimeout(data.premovable.events.unset);
   }
 }
 
@@ -83,13 +79,13 @@ function baseMove(data, orig, dest) {
       data.pieces[dest].color !== data.pieces[orig].color
     ) ? data.pieces[dest] : null;
     // always call events.move
-    callUserFunction(data.events.move.bind(undefined, orig, dest, captured));
+    setTimeout(data.events.move.bind(undefined, orig, dest, captured));
     data.pieces[dest] = data.pieces[orig];
     delete data.pieces[orig];
     data.lastMove = [orig, dest];
     data.check = null;
     tryAutoCastle(data, orig, dest);
-    callUserFunction(data.events.change);
+    setTimeout(data.events.change);
     return true;
   }, data)();
   if (success) data.movable.dropped = [];
@@ -114,12 +110,12 @@ function userMove(data, orig, dest) {
     setSelected(data, null);
     if (data.movable.dropOff === 'trash') {
       delete data.pieces[orig];
-      callUserFunction(data.events.change);
+      setTimeout(data.events.change);
     }
   } else if (canMove(data, orig, dest)) {
     if (baseUserMove(data, orig, dest)) {
       setSelected(data, null);
-      callUserFunction(data.movable.events.after.bind(undefined, orig, dest, {
+      setTimeout(data.movable.events.after.bind(undefined, orig, dest, {
         premove: false,
         holdTime: hold.stop()
       }));
@@ -138,7 +134,7 @@ function selectSquare(data, key) {
       if (data.selected !== key) userMove(data, data.selected, key);
     } else setSelected(data, null);
   } else if (isMovable(data, key) || isPremovable(data, key)) setSelected(data, key);
-  if (key) callUserFunction(data.events.select.bind(undefined, key));
+  if (key) setTimeout(data.events.select.bind(undefined, key));
 }
 
 function setSelected(data, key) {
@@ -195,7 +191,7 @@ function playPremove(data) {
     dest = move[1];
   if (canMove(data, orig, dest)) {
     if (baseUserMove(data, orig, dest)) {
-      callUserFunction(data.movable.events.after.bind(undefined, orig, dest, {
+      setTimeout(data.movable.events.after.bind(undefined, orig, dest, {
         premove: true
       }));
     }
@@ -215,7 +211,7 @@ function stop(data) {
 }
 
 function getKeyAtDomPos(data, pos, bounds) {
-  if (!bounds && !data.bounds) return;
+  if (!bounds && !data.bounds) return null;
   bounds = bounds || data.bounds; // use provided value, or get it from data
   var file = Math.ceil(8 * ((pos[0] - bounds.left) / bounds.width));
   file = data.orientation === 'white' ? file : 9 - file;

@@ -7,7 +7,7 @@ module.exports = function(data, config) {
   if (!config) return;
 
   // don't merge destinations. Just override.
-  if (config.movable && config.movable.dests) delete data.movable.dests;
+  if (config.movable && config.movable.dests) data.movable.dests = null;
 
   merge.recursive(data, config);
 
