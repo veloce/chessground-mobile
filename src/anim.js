@@ -63,7 +63,7 @@ function computePlan(prev, current) {
     }
   }
   news.forEach(function(newP) {
-    var nPreP = closer(newP, missings.filter(samePiece.bind(undefined, newP)));
+    var nPreP = closer(newP, missings.filter(p => samePiece(newP, p)));
     if (nPreP) {
       var orig = white ? nPreP.pos : newP.pos;
       var dest = white ? newP.pos : nPreP.pos;
@@ -108,7 +108,7 @@ function go(data) {
       cfg[1] = [roundBy(cfg[0][0] * ease, 10), roundBy(cfg[0][1] * ease, 10)];
     }
     data.render();
-    requestAnimationFrame(go.bind(undefined, data));
+    requestAnimationFrame(() => go(data));
   }
 }
 
@@ -138,7 +138,7 @@ function animate(transformation, data) {
       fadings: plan.fadings,
       animating: {}
     };
-    if (!alreadyRunning) requestAnimationFrame(go.bind(undefined, data));
+    if (!alreadyRunning) requestAnimationFrame(() => go(data));
   } else {
     // don't animate, just render right away
     data.renderRAF();

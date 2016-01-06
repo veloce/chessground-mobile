@@ -30,7 +30,7 @@ function setCheck(data, color) {
 
 function setPremove(data, orig, dest) {
   data.premovable.current = [orig, dest];
-  setTimeout(data.premovable.events.set.bind(undefined, orig, dest));
+  setTimeout(() => data.premovable.events.set(orig, dest));
 }
 
 function unsetPremove(data) {
@@ -79,7 +79,7 @@ function baseMove(data, orig, dest) {
       data.pieces[dest].color !== data.pieces[orig].color
     ) ? data.pieces[dest] : null;
     // always call events.move
-    setTimeout(data.events.move.bind(undefined, orig, dest, captured));
+    setTimeout(() => data.events.move(orig, dest, captured));
     data.pieces[dest] = data.pieces[orig];
     delete data.pieces[orig];
     data.lastMove = [orig, dest];
@@ -115,7 +115,7 @@ function userMove(data, orig, dest) {
   } else if (canMove(data, orig, dest)) {
     if (baseUserMove(data, orig, dest)) {
       setSelected(data, null);
-      setTimeout(data.movable.events.after.bind(undefined, orig, dest, {
+      setTimeout(() => data.movable.events.after(orig, dest, {
         premove: false,
         holdTime: hold.stop()
       }));
@@ -134,7 +134,7 @@ function selectSquare(data, key) {
       if (data.selected !== key) userMove(data, data.selected, key);
     } else setSelected(data, null);
   } else if (isMovable(data, key) || isPremovable(data, key)) setSelected(data, key);
-  if (key) setTimeout(data.events.select.bind(undefined, key));
+  if (key) setTimeout(() => data.events.select(key));
 }
 
 function setSelected(data, key) {
@@ -191,7 +191,7 @@ function playPremove(data) {
     dest = move[1];
   if (canMove(data, orig, dest)) {
     if (baseUserMove(data, orig, dest)) {
-      setTimeout(data.movable.events.after.bind(undefined, orig, dest, {
+      setTimeout(() => data.movable.events.after(orig, dest, {
         premove: true
       }));
     }
