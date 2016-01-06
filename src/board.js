@@ -230,9 +230,10 @@ function getMaterialDiff(data) {
     knight: 0,
     pawn: 0
   };
-  for (var k in data.pieces) {
-    var p = data.pieces[k];
-    counts[p.role] += ((p.color === 'white') ? 1 : -1);
+  var piecesKeys = Object.keys(data.pieces);
+  for (var i = 0; i < piecesKeys.length; i++) {
+    var p = data.pieces[piecesKeys[i]];
+    counts[p.role] += (p.color === 'white') ? 1 : -1;
   }
   var diff = {
     white: {},
