@@ -25,7 +25,16 @@ function controller(cfg) {
 
   this.selectSquare = anim(board.selectSquare, this.data, true);
 
-  this.apiMove = anim(board.apiMove, this.data);
+  this.apiMove = anim(function(curData, orig, dest, pieces, config) {
+    board.apiMove(curData, orig, dest);
+
+    if (pieces) {
+      board.setPieces(curData, pieces);
+    }
+
+    configure(curData, config);
+
+  }, this.data);
 
   this.playPremove = anim(board.playPremove, this.data);
 

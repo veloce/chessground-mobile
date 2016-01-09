@@ -72,31 +72,30 @@ function tryAutoCastle(data, orig, dest) {
 }
 
 function baseMove(data, orig, dest) {
-  var success = anim(function() {
-    if (orig === dest || !data.pieces[orig]) return false;
-    var captured = (
-      data.pieces[dest] &&
-      data.pieces[dest].color !== data.pieces[orig].color
-    ) ? data.pieces[dest] : null;
-    // always call events.move
-    setTimeout(function() { return data.events.move(orig, dest, captured); });
-    data.pieces[dest] = data.pieces[orig];
-    delete data.pieces[orig];
-    data.lastMove = [orig, dest];
-    data.check = null;
-    tryAutoCastle(data, orig, dest);
-    setTimeout(data.events.change);
-    return true;
-  }, data)();
-  if (success) data.movable.dropped = [];
-  return success;
+  if (orig === dest || !data.pieces[orig]) return false;
+  var captured = (
+    data.pieces[dest] &&
+    data.pieces[dest].color !== data.pieces[orig].color
+  ) ? data.pieces[dest] : null;
+  // always call events.move
+  setTimeout(function() { return data.events.move(orig, dest, captured); });
+  data.pieces[dest] = data.pieces[orig];
+  delete data.pieces[orig];
+  data.lastMove = [orig, dest];
+  data.check = null;
+  tryAutoCastle(data, orig, dest);
+  setTimeout(data.events.change);
+  return true;
 }
 
 function baseUserMove(data, orig, dest) {
-  var result = baseMove(data, orig, dest);
+  var result = anim(function() {
+    return baseMove(data, orig, dest);
+  }, data)();
   if (result) {
     data.movable.dests = {};
     data.turnColor = util.opposite(data.turnColor);
+    data.movable.dropped = [];
   }
   return result;
 }

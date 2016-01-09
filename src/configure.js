@@ -2,7 +2,7 @@ var merge = require('merge');
 var board = require('./board');
 var fen = require('./fen');
 
-module.exports = function(data, config) {
+function configureBoard(data, config) {
 
   if (!config) return;
 
@@ -29,4 +29,6 @@ module.exports = function(data, config) {
   // no need for such short animations
   if (!data.animation.duration || data.animation.duration < 10)
     data.animation.enabled = false;
-};
+}
+
+module.exports = configureBoard;
