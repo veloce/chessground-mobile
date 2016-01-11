@@ -30,13 +30,11 @@ function setCheck(data, color) {
 
 function setPremove(data, orig, dest) {
   data.premovable.current = [orig, dest];
-  setTimeout(function() { return data.premovable.events.set(orig, dest); });
 }
 
 function unsetPremove(data) {
   if (data.premovable.current) {
     data.premovable.current = null;
-    setTimeout(data.premovable.events.unset);
   }
 }
 
@@ -114,10 +112,12 @@ function userMove(data, orig, dest) {
   } else if (canMove(data, orig, dest)) {
     if (baseUserMove(data, orig, dest)) {
       setSelected(data, null);
-      setTimeout(function() { return data.movable.events.after(orig, dest, {
-        premove: false,
-        holdTime: hold.stop()
-      }); });
+      setTimeout(function() {
+        return data.movable.events.after(orig, dest, {
+          premove: false,
+          holdTime: hold.stop()
+        });
+      });
     }
   } else if (canPremove(data, orig, dest)) {
     setPremove(data, orig, dest);
@@ -133,7 +133,6 @@ function selectSquare(data, key) {
       if (data.selected !== key) userMove(data, data.selected, key);
     } else setSelected(data, null);
   } else if (isMovable(data, key) || isPremovable(data, key)) setSelected(data, key);
-  if (key) setTimeout(function() { return data.events.select(key); });
 }
 
 function setSelected(data, key) {

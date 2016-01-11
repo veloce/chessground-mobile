@@ -140,7 +140,6 @@ function animate(transformation, data) {
     };
     if (!alreadyRunning) requestAnimationFrame(function() { return go(data); });
   } else {
-    // don't animate, just render right away
     data.renderRAF();
   }
   return result;
