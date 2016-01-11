@@ -100,9 +100,7 @@ function diffAndRenderBoard(ctrl, prevState) {
     } // no piece at this square
     else {
       // remove any piece that was here
-      if (prevPiece) {
-        while (squareEl.firstChild) squareEl.removeChild(squareEl.firstChild);
-      }
+      while (squareEl.firstChild) squareEl.removeChild(squareEl.firstChild);
     }
   }
 }
