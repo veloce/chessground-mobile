@@ -264,12 +264,9 @@ function renderBoard(ctrl) {
       config: function(el, isUpdate) {
         if (isUpdate) return;
 
-        var scheduledAnimationFrame;
-
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
         ctrl.data.render = function() {
-          scheduledAnimationFrame = false;
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
@@ -284,8 +281,6 @@ function renderBoard(ctrl) {
           }
         };
         ctrl.data.renderRAF = function() {
-          if (scheduledAnimationFrame) return;
-          scheduledAnimationFrame = true;
           requestAnimationFrame(ctrl.data.render);
         };
 
