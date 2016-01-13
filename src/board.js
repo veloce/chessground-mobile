@@ -82,7 +82,6 @@ function baseMove(data, orig, dest) {
   data.lastMove = [orig, dest];
   data.check = null;
   tryAutoCastle(data, orig, dest);
-  setTimeout(data.events.change);
   return true;
 }
 
@@ -107,7 +106,6 @@ function userMove(data, orig, dest) {
     setSelected(data, null);
     if (data.movable.dropOff === 'trash') {
       delete data.pieces[orig];
-      setTimeout(data.events.change);
     }
   } else if (canMove(data, orig, dest)) {
     if (baseUserMove(data, orig, dest)) {
