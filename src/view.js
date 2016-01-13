@@ -2,44 +2,16 @@ var drag = require('./drag');
 var util = require('./util');
 var m = require('mithril');
 
-function savePrevData(ctrl) {
-  var cloned = {
-    pieces: {},
-    fadings: {},
-    anims: {},
-    orientation: ''
-  };
-  var currAnim = ctrl.data.animation.current;
-  var pK = ctrl.data.pieces ? Object.keys(ctrl.data.pieces) : [];
-  var aK = currAnim.anims ? Object.keys(currAnim.anims) : [];
-  var fK = currAnim.fadings ? Object.keys(currAnim.fadings) : [];
-  for (var i = 0, ilen = pK.length; i < ilen; i++) {
-    cloned.pieces[pK[i]] = ctrl.data.pieces[pK[i]];
-  }
-  for (var j = 0, jlen = aK.length; j < jlen; j++) {
-    cloned.anims[aK[j]] = ctrl.data.animation.current.anims[aK[j]];
-  }
-  for (var k = 0, klen = fK.length; k < klen; k++) {
-    cloned.fadings[fK[k]] = ctrl.data.animation.current.fadings[fK[k]];
-  }
-  cloned.orientation = ctrl.data.orientation;
-
-  return cloned;
-}
-
-function diffAndRenderBoard(ctrl, prevState) {
+function diffAndRenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, prevPiece, fading, prevFading, pieceEl, squareEl, sqClass, anim, prevAnim;
+  var key, piece, fading, pieceEl, squareEl, sqClass, anim;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
-    prevPiece = prevState.pieces[key];
     anim = anims && anims[key];
-    prevAnim = prevState.anims[key];
     fading = fadings && fadings[key];
-    prevFading = prevState.fadings[key];
     squareEl = ctrl.data.squareEls[key];
     sqClass = squareClass(ctrl, key, piece);
 
@@ -53,8 +25,8 @@ function diffAndRenderBoard(ctrl, prevState) {
     if (squareEl.className !== sqClass) squareEl.className = sqClass;
 
     // remove previous fading if any when animation is finished
-    if (prevFading && !fading) {
-      var fadingPieceEls = squareEl.getElementsByClassName('cg-piece fading');
+    var fadingPieceEls = squareEl.getElementsByClassName('cg-piece fading');
+    if (!fading) {
       while (fadingPieceEls[0]) squareEl.removeChild(fadingPieceEls[0]);
     }
     // there is a now piece at this square
@@ -62,40 +34,30 @@ function diffAndRenderBoard(ctrl, prevState) {
       if (anim) {
         var animP = squareEl.getElementsByClassName('cg-piece').item(0);
         if (animP) animP.style[util.transformProp()] = util.translate(anim[1]);
-      } else if (prevAnim) {
+      } else {
         var prevAnimP = squareEl.getElementsByClassName('cg-piece').item(0);
         if (prevAnimP) prevAnimP.removeAttribute('style');
       }
       // a piece was already there
-      if (prevPiece) {
+      if (squareEl.firstChild) {
         // same piece same square: do nothing
-        if (piece.role === prevPiece.role && piece.color === prevPiece.color) {
+        if (squareEl.firstChild.getAttribute('data-rolecolor') === piece.role + piece.color) {
           continue;
         } else {
           // different pieces: remove old piece and put new one
           pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-          if (squareEl.firstChild && squareEl.firstChild.nodeType) {
-            squareEl.replaceChild(pieceEl, squareEl.firstChild);
-          } else {
-            squareEl.appendChild(pieceEl);
-            console.log('Chessground: failed attempt to replace child on square ' + key);
-          }
+          squareEl.replaceChild(pieceEl, squareEl.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
-          if (fading && !prevFading) {
+          if (fading && !fadingPieceEls[0]) {
             squareEl.appendChild(renderCapturedDom(fading));
           }
         }
       } // empty square before: just put the piece
       else {
         pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-        if (squareEl.firstChild && squareEl.firstChild.nodeType) {
-          squareEl.replaceChild(pieceEl, squareEl.firstChild);
-          console.log('Chessground: this square should not have a child ' + key);
-        } else {
-          squareEl.appendChild(pieceEl);
-        }
+        squareEl.appendChild(pieceEl);
       }
     } // no piece at this square
     else {
@@ -112,7 +74,8 @@ function pieceClass(p) {
 function renderPiece(ctrl, key, p) {
   var attrs = {
     style: {},
-    className: pieceClass(p)
+    className: pieceClass(p),
+    'data-rolecolor': p.role + p.color
   };
   var draggable = ctrl.data.draggable.current;
   if (draggable.orig === key && (draggable.pos[0] !== 0 || draggable.pos[1] !== 0)) {
@@ -134,6 +97,7 @@ function renderPiece(ctrl, key, p) {
 function renderPieceDom(vdom) {
   var p = document.createElement('div');
   p.className = vdom.attrs.className;
+  p.dataset.rolecolor = vdom.attrs['data-rolecolor'];
   p.style[util.transformProp()] = vdom.attrs.style[util.transformProp()];
   return p;
 }
@@ -175,13 +139,13 @@ function renderSquare(ctrl, pos, asWhite) {
       }
     }
   };
-  var children = [];
-  if (piece) {
-    children.push(renderPiece(ctrl, key, piece));
-  }
   if (ctrl.data.coordinates) {
     if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-x'] = file;
     if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-y'] = rank;
+  }
+  var children = [];
+  if (piece) {
+    children.push(renderPiece(ctrl, key, piece));
   }
   return {
     tag: 'div',
@@ -264,37 +228,33 @@ function renderBoard(ctrl) {
       config: function(el, isUpdate) {
         if (isUpdate) return;
 
+        var scheduledAnimationFrame = false;
+
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
         ctrl.data.render = function() {
+          scheduledAnimationFrame = false;
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
-            if (ctrl.data.prevState.orientation !== ctrl.data.orientation) {
+            if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
               m.render(el, renderContent(ctrl), true);
-              ctrl.data.prevState = savePrevData(ctrl);
-              diffAndRenderBoard(ctrl, ctrl.data.prevState);
+              ctrl.data.prevOrientation = ctrl.data.orientation;
             } else {
-              diffAndRenderBoard(ctrl, ctrl.data.prevState);
-              ctrl.data.prevState = savePrevData(ctrl);
+              diffAndRenderBoard(ctrl);
             }
           }
         };
         ctrl.data.renderRAF = function() {
-          requestAnimationFrame(ctrl.data.render);
+          if (!scheduledAnimationFrame) {
+            scheduledAnimationFrame = true;
+            requestAnimationFrame(ctrl.data.render);
+          }
         };
-
-        // set initial ui state
-        ctrl.data.prevState = {
-          pieces: ctrl.data.pieces,
-          fadings: {},
-          anims: {},
-          orientation: ctrl.data.orientation
-        };
-
-        ctrl.data.render();
 
         bindEvents(ctrl, el);
+
+        ctrl.data.renderRAF();
       }
     },
     children: renderContent(ctrl)
