@@ -74,7 +74,6 @@ function start(data, e) {
     hold.start();
   } else if (hadPremove) board.unsetPremove(data);
   data.renderRAF();
-  processDrag(data);
 }
 
 function processDrag(data) {
@@ -84,50 +83,48 @@ function processDrag(data) {
     var cur = data.draggable.current;
     cur.scheduledAnimationFrame = false;
     if (cur.orig) {
+      // if moving piece is gone, cancel
+      if (data.pieces[cur.orig] !== cur.piece) {
+        cancel(data);
+        return;
+      }
+
       // cancel animations while dragging
       if (data.animation.current.start &&
         Object.keys(data.animation.current.anims).indexOf(cur.orig) !== -1)
         data.animation.current.start = false;
 
-      // if moving piece is gone, cancel
-      if (data.pieces[cur.orig] !== cur.piece) cancel(data);
-      else {
-        if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
-          cur.started = true;
-          cur.draggingPiece.classList.add('dragging');
+      else if (cur.started) {
+        cur.pos = [
+          cur.epos[0] - cur.rel[0],
+          cur.epos[1] - cur.rel[1]
+        ];
+
+        cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
+        if (cur.over && !cur.squareTarget) {
+          cur.squareTarget = renderSquareTarget(data, cur);
+        } else if (!cur.over && cur.squareTarget) {
+          if (cur.squareTarget.parentNode) cur.squareTarget.parentNode.removeChild(cur.squareTarget);
+          cur.squareTarget = null;
         }
-        if (cur.started) {
-          cur.pos = [
-            cur.epos[0] - cur.rel[0],
-            cur.epos[1] - cur.rel[1]
+
+        // move piece
+        cur.draggingPiece.style[util.transformProp()] = util.translate([
+          cur.pos[0] + cur.dec[0],
+          cur.pos[1] + cur.dec[1]
+        ]);
+
+        // move square target
+        if (cur.over && cur.squareTarget && cur.over !== cur.prevTarget) {
+          var squareWidth = cur.bounds.width / 8,
+          asWhite = data.orientation === 'white',
+          stPos = util.key2pos(cur.over),
+          vector = [
+            (asWhite ? stPos[0] - 1 : 8 - stPos[0]) * squareWidth,
+            (asWhite ? 8 - stPos[1] : stPos[1] - 1) * squareWidth
           ];
-
-          cur.over = board.getKeyAtDomPos(data, cur.epos, cur.bounds);
-          if (cur.over && !cur.squareTarget) {
-            cur.squareTarget = renderSquareTarget(data, cur);
-          } else if (!cur.over && cur.squareTarget) {
-            if (cur.squareTarget.parentNode) cur.squareTarget.parentNode.removeChild(cur.squareTarget);
-            cur.squareTarget = null;
-          }
-
-          // move piece
-          cur.draggingPiece.style[util.transformProp()] = util.translate([
-            cur.pos[0] + cur.dec[0],
-            cur.pos[1] + cur.dec[1]
-          ]);
-
-          // move square target
-          if (cur.over && cur.squareTarget && cur.over !== cur.prevTarget) {
-            var squareWidth = cur.bounds.width / 8,
-            asWhite = data.orientation === 'white',
-            stPos = util.key2pos(cur.over),
-            vector = [
-              (asWhite ? stPos[0] - 1 : 8 - stPos[0]) * squareWidth,
-              (asWhite ? 8 - stPos[1] : stPos[1] - 1) * squareWidth
-            ];
-            cur.squareTarget.style[util.transformProp()] = util.translate(vector);
-            cur.prevTarget = cur.over;
-          }
+          cur.squareTarget.style[util.transformProp()] = util.translate(vector);
+          cur.prevTarget = cur.over;
         }
       }
       processDrag(data);
@@ -138,8 +135,14 @@ function processDrag(data) {
 function move(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
 
-  if (data.draggable.current.orig) {
+  var cur = data.draggable.current;
+  if (cur.orig) {
     data.draggable.current.epos = util.eventPosition(e);
+    if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
+      cur.started = true;
+      cur.draggingPiece.classList.add('dragging');
+      processDrag(data);
+    }
   }
 }
 
@@ -157,11 +160,12 @@ function end(data, e) {
     dest = draggable.current.over;
     if (orig !== dest) data.movable.dropped = [orig, dest];
     board.userMove(data, orig, dest);
+    data.renderRAF();
   } else if (draggable.current.previouslySelected === orig) {
     board.setSelected(data, null);
+    data.renderRAF();
   }
   draggable.current = {};
-  data.renderRAF();
 }
 
 function cancel(data) {
