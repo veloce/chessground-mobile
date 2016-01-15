@@ -228,12 +228,12 @@ function renderBoard(ctrl) {
       config: function(el, isUpdate) {
         if (isUpdate) return;
 
-        var scheduledAnimationFrame = false;
+        ctrl.data.scheduledAnimationFrame = false;
 
         ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
         ctrl.data.render = function() {
-          scheduledAnimationFrame = false;
+          ctrl.data.scheduledAnimationFrame = false;
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
@@ -246,9 +246,8 @@ function renderBoard(ctrl) {
           }
         };
         ctrl.data.renderRAF = function() {
-          if (!scheduledAnimationFrame) {
-            scheduledAnimationFrame = true;
-            requestAnimationFrame(ctrl.data.render);
+          if (!ctrl.data.scheduledAnimationFrame) {
+            ctrl.data.scheduledAnimationFrame = requestAnimationFrame(ctrl.data.render);
           }
         };
 

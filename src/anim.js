@@ -91,7 +91,7 @@ function roundBy(n, by) {
   return Math.round(n * by) / by;
 }
 
-function go(data) {
+function step(data) {
   // animation was canceled
   if (!data.animation.current.start) return;
   var rest = 1 - (Date.now() - data.animation.current.start) / data.animation.current.duration;
@@ -108,7 +108,7 @@ function go(data) {
       cfg[1] = [roundBy(cfg[0][0] * ease, 10), roundBy(cfg[0][1] * ease, 10)];
     }
     data.render();
-    requestAnimationFrame(function() { return go(data); });
+    data.scheduledAnimationFrame = requestAnimationFrame(function() { return step(data); });
   }
 }
 
@@ -138,7 +138,7 @@ function animate(transformation, data) {
       fadings: plan.fadings,
       animating: {}
     };
-    if (!alreadyRunning) requestAnimationFrame(function() { return go(data); });
+    if (!alreadyRunning) data.scheduledAnimationFrame = requestAnimationFrame(function() { return step(data); });
   } else {
     data.renderRAF();
   }
@@ -156,7 +156,7 @@ module.exports = function(transformation, data, skip) {
     }
     var transformationArgs = [data].concat(args);
     if (!data.render) return transformation.apply(null, transformationArgs);
-    else if (data.animation.enabled && !skip)
+    else if (data.animation.enabled && !data.animation.current.start && !skip)
       return animate(util.partialApply(transformation, transformationArgs), data);
     else {
       var result = transformation.apply(null, transformationArgs);
