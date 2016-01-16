@@ -2,7 +2,7 @@ var drag = require('./drag');
 var util = require('./util');
 var m = require('mithril');
 
-function diffAndRenderBoard(ctrl) {
+function rerenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
   var key, piece, fading, pieceEl, squareNode, sqClass, anim, curPieceNode;
@@ -249,7 +249,7 @@ function renderBoard(ctrl) {
               m.render(el, renderContent(ctrl), true);
               ctrl.data.prevOrientation = ctrl.data.orientation;
             } else {
-              diffAndRenderBoard(ctrl);
+              rerenderBoard(ctrl);
             }
           }
         };
