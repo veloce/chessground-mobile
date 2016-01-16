@@ -5,7 +5,7 @@ var m = require('mithril');
 function diffAndRenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, fading, pieceEl, squareEl, sqClass, anim;
+  var key, piece, fading, pieceEl, squareEl, sqClass, anim, prevPiece;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
@@ -13,6 +13,7 @@ function diffAndRenderBoard(ctrl) {
     anim = anims && anims[key];
     fading = fadings && fadings[key];
     squareEl = ctrl.data.squareEls[key];
+    prevPiece = squareEl.firstChild;
     sqClass = squareClass(ctrl, key, piece);
 
     // should not happen
@@ -39,9 +40,9 @@ function diffAndRenderBoard(ctrl) {
         if (prevAnimP) prevAnimP.removeAttribute('style');
       }
       // a piece was already there
-      if (squareEl.firstChild) {
+      if (prevPiece) {
         // same piece same square: do nothing
-        if (squareEl.firstChild.getAttribute('data-rolecolor') === piece.role + piece.color) {
+        if (prevPiece.cgRole === piece.role && prevPiece.cgColor === piece.color) {
           continue;
         } else {
           // different pieces: remove old piece and put new one
@@ -75,7 +76,14 @@ function renderPiece(ctrl, key, p) {
   var attrs = {
     style: {},
     className: pieceClass(p),
-    'data-rolecolor': p.role + p.color
+    cgRole: p.role,
+    cgColor: p.color,
+    config: function(el, isUpdate) {
+      if (!isUpdate) {
+        el.cgRole = p.role;
+        el.cgColor = p.color;
+      }
+    }
   };
   var draggable = ctrl.data.draggable.current;
   if (draggable.orig === key && (draggable.pos[0] !== 0 || draggable.pos[1] !== 0)) {
@@ -97,7 +105,8 @@ function renderPiece(ctrl, key, p) {
 function renderPieceDom(vdom) {
   var p = document.createElement('div');
   p.className = vdom.attrs.className;
-  p.dataset.rolecolor = vdom.attrs['data-rolecolor'];
+  p.cgRole = vdom.attrs.cgRole;
+  p.cgColor = vdom.attrs.cgColor;
   p.style[util.transformProp()] = vdom.attrs.style[util.transformProp()];
   return p;
 }

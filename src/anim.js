@@ -156,7 +156,7 @@ module.exports = function(transformation, data, skip) {
     }
     var transformationArgs = [data].concat(args);
     if (!data.render) return transformation.apply(null, transformationArgs);
-    else if (data.animation.enabled && !data.animation.current.start && !skip)
+    else if (data.animation.enabled && !skip)
       return animate(util.partialApply(transformation, transformationArgs), data);
     else {
       var result = transformation.apply(null, transformationArgs);
