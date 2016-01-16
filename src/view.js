@@ -5,65 +5,64 @@ var m = require('mithril');
 function diffAndRenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, fading, pieceEl, squareEl, sqClass, anim, prevPiece;
+  var key, piece, fading, pieceEl, squareNode, sqClass, anim, curPieceNode;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
     anim = anims && anims[key];
     fading = fadings && fadings[key];
-    squareEl = ctrl.data.squareEls[key];
-    prevPiece = squareEl.firstChild;
+    squareNode = ctrl.data.squareEls[key];
+    curPieceNode = squareNode.firstChild;
     sqClass = squareClass(ctrl, key, piece);
 
     // should not happen
-    if (squareEl === undefined || squareEl === null) {
+    if (squareNode === undefined || squareNode === null) {
       console.log('Chessground: attempt to diff against unexisting square element ' + key);
       return;
     }
 
     // update highlights
-    if (squareEl.className !== sqClass) squareEl.className = sqClass;
+    if (squareNode.className !== sqClass) squareNode.className = sqClass;
 
     // remove previous fading if any when animation is finished
-    var fadingPieceEls = squareEl.getElementsByClassName('cg-piece fading');
     if (!fading) {
-      while (fadingPieceEls[0]) squareEl.removeChild(fadingPieceEls[0]);
+      var fadingPieceEls = squareNode.getElementsByClassName('cg-piece fading');
+      while (fadingPieceEls[0]) squareNode.removeChild(fadingPieceEls[0]);
     }
     // there is a now piece at this square
     if (piece) {
       if (anim) {
-        var animP = squareEl.getElementsByClassName('cg-piece').item(0);
-        if (animP) animP.style[util.transformProp()] = util.translate(anim[1]);
+        if (curPieceNode) curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
       } else {
-        var prevAnimP = squareEl.getElementsByClassName('cg-piece').item(0);
-        if (prevAnimP) prevAnimP.removeAttribute('style');
+        if (curPieceNode) curPieceNode.removeAttribute('style');
       }
       // a piece was already there
-      if (prevPiece) {
+      if (curPieceNode) {
         // same piece same square: do nothing
-        if (prevPiece.cgRole === piece.role && prevPiece.cgColor === piece.color) {
+        if (curPieceNode.cgRole === piece.role && curPieceNode.cgColor === piece.color) {
           continue;
         } else {
           // different pieces: remove old piece and put new one
           pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-          squareEl.replaceChild(pieceEl, squareEl.firstChild);
+          squareNode.replaceChild(pieceEl, squareNode.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
+          fadingPieceEls = fadingPieceEls || squareNode.getElementsByClassName('cg-piece fading');
           if (fading && !fadingPieceEls[0]) {
-            squareEl.appendChild(renderCapturedDom(fading));
+            squareNode.appendChild(renderCapturedDom(fading));
           }
         }
       } // empty square before: just put the piece
       else {
         pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-        squareEl.appendChild(pieceEl);
+        squareNode.appendChild(pieceEl);
       }
     } // no piece at this square
     else {
       // remove any piece that was here
-      while (squareEl.firstChild) squareEl.removeChild(squareEl.firstChild);
+      while (squareNode.firstChild) squareNode.removeChild(squareNode.firstChild);
     }
   }
 }
