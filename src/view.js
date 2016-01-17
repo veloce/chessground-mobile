@@ -32,18 +32,21 @@ function rerenderBoard(ctrl) {
     }
     // there is a now piece at this square
     if (piece) {
-      if (anim) {
-        if (curPieceNode) curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
-      } else {
-        if (curPieceNode) curPieceNode.removeAttribute('style');
-      }
-      // a piece was already there
+      // a piece node is already there
       if (curPieceNode) {
-        // same piece same square: do nothing
+        // same piece same square: animate or end animation
         if (curPieceNode.cgRole === piece.role && curPieceNode.cgColor === piece.color) {
-          continue;
-        } else {
-          // different pieces: remove old piece and put new one
+          // animate piece during animation
+          if (anim) {
+            curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
+          }
+          // remove animation style after animation
+          else {
+            curPieceNode.removeAttribute('style');
+          }
+        }
+        // different pieces: remove old piece and put new one
+        else {
           pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
           squareNode.replaceChild(pieceEl, squareNode.firstChild);
           // during an animation we render a temporary 'fading' piece (the name
