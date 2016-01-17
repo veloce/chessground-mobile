@@ -34,17 +34,16 @@ function rerenderBoard(ctrl) {
     if (piece) {
       // a piece node is already there
       if (curPieceNode) {
-        // animate piece during animation
-        if (anim) {
-          curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
-        }
-        // remove animation style after animation
-        else {
-          curPieceNode.removeAttribute('style');
-        }
-        // same piece same square: do nothing
+        // same piece same square: animate or end animation
         if (curPieceNode.cgRole === piece.role && curPieceNode.cgColor === piece.color) {
-          continue;
+          // animate piece during animation
+          if (anim) {
+            curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
+          }
+          // remove animation style after animation
+          else {
+            curPieceNode.removeAttribute('style');
+          }
         }
         // different pieces: remove old piece and put new one
         else {
