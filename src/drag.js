@@ -26,7 +26,7 @@ function renderSquareTarget(data, cur) {
 
 function fixDomAfterDrag(data) {
   if (data.element) {
-    var dp = data.element.querySelector('.cg-piece.dragging');
+    var dp = data.element.querySelector('.dragging');
     if (dp) {
       dp.classList.remove('dragging');
       dp.removeAttribute('style');

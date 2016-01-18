@@ -27,7 +27,7 @@ function rerenderBoard(ctrl) {
 
     // remove previous fading if any when animation is finished
     if (!fading) {
-      var fadingPieceEls = squareNode.getElementsByClassName('cg-piece fading');
+      var fadingPieceEls = squareNode.getElementsByClassName('fading');
       while (fadingPieceEls[0]) squareNode.removeChild(fadingPieceEls[0]);
     }
     // there is a now piece at this square
@@ -54,7 +54,7 @@ function rerenderBoard(ctrl) {
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
-          fadingPieceEls = fadingPieceEls || squareNode.getElementsByClassName('cg-piece fading');
+          fadingPieceEls = fadingPieceEls || squareNode.getElementsByClassName('fading');
           if (fading && !fadingPieceEls[0]) {
             squareNode.appendChild(renderCapturedDom(fading));
           }
@@ -73,7 +73,7 @@ function rerenderBoard(ctrl) {
 }
 
 function pieceClass(p) {
-  return ['cg-piece', p.role, p.color].join(' ');
+  return p.role + ' ' + p.color;
 }
 
 function renderPiece(ctrl, key, p) {
@@ -101,13 +101,13 @@ function renderPiece(ctrl, key, p) {
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   }
   return {
-    tag: 'div',
+    tag: 'piece',
     attrs: attrs
   };
 }
 
 function renderPieceDom(vdom) {
-  var p = document.createElement('div');
+  var p = document.createElement('piece');
   p.className = vdom.attrs.className;
   p.cgRole = vdom.attrs.cgRole;
   p.cgColor = vdom.attrs.cgColor;
@@ -116,13 +116,13 @@ function renderPieceDom(vdom) {
 }
 
 function renderCapturedDom(p) {
-  var cap = document.createElement('div');
+  var cap = document.createElement('piece');
   cap.className = pieceClass(p) + ' fading';
   return cap;
 }
 
 function squareClass(ctrl, key, piece) {
-  return 'cg-square ' + key + ' ' + util.classSet({
+  return util.classSet({
     'selected': ctrl.data.selected === key,
     'check': ctrl.data.highlight.check && ctrl.data.check === key,
     'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
@@ -161,7 +161,7 @@ function renderSquare(ctrl, pos, asWhite) {
     children.push(renderPiece(ctrl, key, piece));
   }
   return {
-    tag: 'div',
+    tag: 'square',
     attrs: attrs,
     children: children
   };
@@ -173,9 +173,9 @@ function renderMinimalDom(ctrl, asWhite) {
     var pos = util.key2pos(key);
     var bpos = util.boardpos(pos, asWhite);
     children.push({
-      tag: 'div',
+      tag: 'square',
       attrs: {
-        className: 'cg-square last-move',
+        className: 'last-move',
         style: {
           left: bpos.left + '%',
           bottom: bpos.bottom + '%'
@@ -196,7 +196,7 @@ function renderMinimalDom(ctrl, asWhite) {
       className: pieceClass(ctrl.data.pieces[key])
     };
     children.push({
-      tag: 'div',
+      tag: 'piece',
       attrs: attrs
     });
   }
@@ -232,7 +232,6 @@ function renderBoard(ctrl) {
   return {
     tag: 'div',
     attrs: {
-      id: 'cg-board',
       className: [
         'cg-board orientation-' + ctrl.data.orientation,
         ctrl.data.viewOnly ? 'view-only' : 'manipulable',
