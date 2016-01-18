@@ -39,10 +39,12 @@ function rerenderBoard(ctrl) {
           // animate piece during animation
           if (anim) {
             curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
+            curPieceNode.cgAnimating = true;
           }
           // remove animation style after animation
-          else {
+          else if (curPieceNode.cgAnimating) {
             curPieceNode.removeAttribute('style');
+            curPieceNode.cgAnimating = false;
           }
         }
         // different pieces: remove old piece and put new one
