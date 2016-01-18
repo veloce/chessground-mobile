@@ -65,7 +65,11 @@ function controller(cfg) {
   // no need to debounce: resizable only by orientation change
   var onresize = function() {
     if (this.data.element) {
-      this.data.bounds = this.data.element.getBoundingClientRect();
+      // oh my what an ugly hack
+      clearTimeout(ttId);
+      var ttId = setTimeout(function() {
+        this.data.bounds = this.data.element.getBoundingClientRect();
+      }.bind(this), 100);
     }
   }.bind(this);
 
