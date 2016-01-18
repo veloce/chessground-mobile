@@ -108,10 +108,16 @@ function renderPiece(ctrl, key, p) {
 
 function renderPieceDom(vdom) {
   var p = document.createElement('piece');
+  var trans = vdom.attrs.style[util.transformProp()];
   p.className = vdom.attrs.className;
   p.cgRole = vdom.attrs.cgRole;
   p.cgColor = vdom.attrs.cgColor;
-  p.style[util.transformProp()] = vdom.attrs.style[util.transformProp()];
+  if (trans) {
+    p.style[util.transformProp()] = trans;
+    if (p.className.indexOf('dragging') === -1) {
+      p.cgAnimating = true;
+    }
+  }
   return p;
 }
 
