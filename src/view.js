@@ -128,7 +128,7 @@ function renderCapturedDom(p) {
 }
 
 function squareClass(ctrl, key, piece) {
-  return util.classSet({
+  return key + ' ' + util.classSet({
     'selected': ctrl.data.selected === key,
     'check': ctrl.data.highlight.check && ctrl.data.check === key,
     'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
