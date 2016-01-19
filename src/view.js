@@ -270,8 +270,7 @@ function renderBoard(ctrl) {
         };
 
         bindEvents(ctrl, el);
-
-        ctrl.data.renderRAF();
+        ctrl.data.render();
       }
     },
     children: renderContent(ctrl)
