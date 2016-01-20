@@ -37,10 +37,9 @@ function fixDomAfterDrag(data) {
 }
 
 function start(data, e) {
-  if (e.button !== undefined && e.button !== 0) return; // only touch or left click
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
-  e.stopPropagation();
   e.preventDefault();
+  e.stopPropagation();
   var previouslySelected = data.selected;
   var position = util.eventPosition(e);
   var bounds = data.bounds;
@@ -64,7 +63,7 @@ function start(data, e) {
       bounds: bounds,
       started: false,
       squareTarget: null,
-      draggingPiece: e.target,
+      draggingPiece: e.target.parentNode.tagName === 'SQUARE' ? e.target : e.target.firstChild,
       originTarget: e.target,
       scheduledAnimationFrame: false
     };
@@ -134,6 +133,7 @@ function processDrag(data) {
 
 function move(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
+  e.preventDefault();
 
   var cur = data.draggable.current;
   if (cur.orig) {
@@ -147,14 +147,20 @@ function move(data, e) {
 }
 
 function end(data, e) {
+  e.preventDefault();
   var draggable = data.draggable;
   var orig = draggable.current ? draggable.current.orig : null;
   var dest;
-  fixDomAfterDrag(data);
-  if (!orig) return;
   // comparing with the origin target is an easy way to test that the end event
   // has the same touch origin
-  if (e && e.type === 'touchend' && draggable.current.originTarget !== e.target) return;
+  if (e && e.type === 'touchend' && draggable.current.originTarget !== e.target) {
+    return;
+  }
+  if (!orig) {
+    fixDomAfterDrag(data);
+    return;
+  }
+  fixDomAfterDrag(data);
   board.unsetPremove(data);
   if (draggable.current.started) {
     dest = draggable.current.over;

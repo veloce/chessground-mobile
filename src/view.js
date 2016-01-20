@@ -89,14 +89,7 @@ function renderPiece(ctrl, key, p) {
       }
     }
   };
-  var draggable = ctrl.data.draggable.current;
-  if (draggable.orig === key && (draggable.pos[0] !== 0 || draggable.pos[1] !== 0)) {
-    attrs.style[util.transformProp()] = util.translate([
-      draggable.pos[0] + draggable.dec[0],
-      draggable.pos[1] + draggable.dec[1]
-    ]);
-    attrs.className += ' dragging';
-  } else if (ctrl.data.animation.current.anims) {
+  if (ctrl.data.animation.current.anims) {
     var animation = ctrl.data.animation.current.anims[key];
     if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   }
