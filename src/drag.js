@@ -63,7 +63,7 @@ function start(data, e) {
       bounds: bounds,
       started: false,
       squareTarget: null,
-      draggingPiece: e.target.parentNode.tagName === 'SQUARE' ? e.target : e.target.firstChild,
+      draggingPiece: data.element.querySelector('.' + orig + ' > piece'),
       originTarget: e.target,
       scheduledAnimationFrame: false
     };
