@@ -5,7 +5,7 @@ var m = require('mithril');
 function rerenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, fading, pieceEl, squareNode, sqClass, anim, curPieceNode;
+  var key, piece, fading, squareNode, sqClass, anim, curPieceNode;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
@@ -30,7 +30,7 @@ function rerenderBoard(ctrl) {
       var fadingPieceEls = squareNode.getElementsByClassName('fading');
       while (fadingPieceEls[0]) squareNode.removeChild(fadingPieceEls[0]);
     }
-    // there is a now piece at this square
+    // there is a piece at this square
     if (piece) {
       // a piece node is already there
       if (curPieceNode) {
@@ -49,8 +49,7 @@ function rerenderBoard(ctrl) {
         }
         // different pieces: remove old piece and put new one
         else {
-          pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-          squareNode.replaceChild(pieceEl, squareNode.firstChild);
+          squareNode.replaceChild(renderPieceDom(renderPiece(ctrl, key, piece)), curPieceNode);
           // during an animation we render a temporary 'fading' piece (the name
           // is wrong because it's not fading, it's juste here)
           // make sure there is no fading piece already (may happen with promotion)
@@ -61,8 +60,7 @@ function rerenderBoard(ctrl) {
         }
       } // empty square before: just put the piece
       else {
-        pieceEl = renderPieceDom(renderPiece(ctrl, key, piece));
-        squareNode.appendChild(pieceEl);
+        squareNode.appendChild(renderPieceDom(renderPiece(ctrl, key, piece)));
       }
     } // no piece at this square
     else {
