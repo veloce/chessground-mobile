@@ -34,18 +34,19 @@ function rerenderBoard(ctrl) {
     if (piece) {
       // a piece node is already there
       if (curPieceNode) {
-        // same piece same square: animate or end animation
+        // animate piece during animation
+        if (anim) {
+          curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
+          curPieceNode.cgAnimating = true;
+        }
+        // remove animation style after animation
+        else if (curPieceNode.cgAnimating) {
+          curPieceNode.removeAttribute('style');
+          curPieceNode.cgAnimating = false;
+        }
+        // same piece same square: do nothing
         if (curPieceNode.cgRole === piece.role && curPieceNode.cgColor === piece.color) {
-          // animate piece during animation
-          if (anim) {
-            curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
-            curPieceNode.cgAnimating = true;
-          }
-          // remove animation style after animation
-          else if (curPieceNode.cgAnimating) {
-            curPieceNode.removeAttribute('style');
-            curPieceNode.cgAnimating = false;
-          }
+          continue;
         }
         // different pieces: remove old piece and put new one
         else {
@@ -75,6 +76,10 @@ function pieceClass(p) {
 }
 
 function renderPiece(ctrl, key, p) {
+  var animation;
+  if (ctrl.data.animation.current.anims) {
+    animation = ctrl.data.animation.current.anims[key];
+  }
   var attrs = {
     style: {},
     className: pieceClass(p),
@@ -84,13 +89,11 @@ function renderPiece(ctrl, key, p) {
       if (!isUpdate) {
         el.cgRole = p.role;
         el.cgColor = p.color;
+        if (animation) p.cgAnimating = true;
       }
     }
   };
-  if (ctrl.data.animation.current.anims) {
-    var animation = ctrl.data.animation.current.anims[key];
-    if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
-  }
+  if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   return {
     tag: 'piece',
     attrs: attrs
@@ -249,6 +252,7 @@ function renderBoard(ctrl) {
             if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
               m.render(el, renderContent(ctrl), true);
               ctrl.data.prevOrientation = ctrl.data.orientation;
+              rerenderBoard(ctrl);
             } else {
               rerenderBoard(ctrl);
             }
