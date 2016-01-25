@@ -133,7 +133,7 @@ function processDrag(data) {
 
 function move(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
-  e.preventDefault();
+  if (data.draggable.preventDefault) e.preventDefault();
 
   var cur = data.draggable.current;
   if (cur.orig) {
@@ -147,7 +147,7 @@ function move(data, e) {
 }
 
 function end(data, e) {
-  e.preventDefault();
+  if (data.draggable.preventDefault) e.preventDefault();
   var draggable = data.draggable;
   var orig = draggable.current ? draggable.current.orig : null;
   var dest;

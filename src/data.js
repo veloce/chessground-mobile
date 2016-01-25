@@ -77,6 +77,7 @@ module.exports = function(cfg) {
       distance: 3, // minimum distance to initiate a drag, in pixels
       squareTarget: true, // display a shadow target under piece
       centerPiece: false, // center the piece under finger (otherwise shifted up)
+      preventDefault: true, // whether to prevent default on move and end
       /*{ // current
        *  orig: "a2", // orig key of dragging piece
        *  rel: [100, 170] // x, y of the piece at original position
