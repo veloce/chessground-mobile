@@ -24,13 +24,8 @@ function renderSquareTarget(data, cur) {
   return sq;
 }
 
-function fixDomAfterDrag(data) {
+function removeSquareTarget(data) {
   if (data.element) {
-    var dp = data.element.querySelector('.dragging');
-    if (dp) {
-      dp.classList.remove('dragging');
-      dp.removeAttribute('style');
-    }
     var sqs = data.element.getElementsByClassName('cg-square-target');
     while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
   }
@@ -141,6 +136,7 @@ function move(data, e) {
     if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
       cur.started = true;
       cur.draggingPiece.classList.add('dragging');
+      cur.draggingPiece.cgDragging = true;
       processDrag(data);
     }
   }
@@ -157,10 +153,10 @@ function end(data, e) {
     return;
   }
   if (!orig) {
-    fixDomAfterDrag(data);
+    removeSquareTarget(data);
     return;
   }
-  fixDomAfterDrag(data);
+  removeSquareTarget(data);
   board.unsetPremove(data);
   if (draggable.current.started) {
     dest = draggable.current.over;
@@ -175,7 +171,7 @@ function end(data, e) {
 }
 
 function cancel(data) {
-  fixDomAfterDrag(data);
+  removeSquareTarget(data);
   if (data.draggable.current.orig) {
     data.draggable.current = {};
     board.selectSquare(data, null);

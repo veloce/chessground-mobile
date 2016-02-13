@@ -5,12 +5,13 @@ var m = require('mithril');
 function rerenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, fading, squareNode, sqClass, anim, curPieceNode;
+  var key, piece, fading, squareNode, sqClass, anim, curPieceNode, dragging;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
     anim = anims && anims[key];
+    dragging = ctrl.data.draggable.current.orig === key;
     fading = fadings && fadings[key];
     squareNode = ctrl.data.squareEls[key];
     curPieceNode = squareNode.firstChild;
@@ -34,6 +35,12 @@ function rerenderBoard(ctrl) {
     if (piece) {
       // a piece node is already there
       if (curPieceNode) {
+        // if piece not being dragged, remove dragging style
+        if (!dragging && curPieceNode.cgDragging) {
+          curPieceNode.classList.remove('dragging');
+          curPieceNode.removeAttribute('style');
+          curPieceNode.cgDragging = false;
+        }
         // animate piece during animation
         if (anim) {
           curPieceNode.style[util.transformProp()] = util.translate(anim[1]);
