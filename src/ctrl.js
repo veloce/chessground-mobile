@@ -23,6 +23,9 @@ function controller(cfg) {
 
   this.setPieces = anim(board.setPieces, this.data);
 
+  // useful for board editor only as a workaround for ios issue
+  this.setDragPiece = anim(board.setDragPiece, this.data);
+
   this.selectSquare = anim(board.selectSquare, this.data, true);
 
   this.apiMove = anim(function(curData, orig, dest, pieces, config) {

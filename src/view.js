@@ -84,6 +84,8 @@ function pieceClass(p) {
 
 function renderPiece(ctrl, key, p) {
   var animation;
+  var draggable = ctrl.data.draggable.current;
+  var dragging = draggable.orig === key && draggable.started;
   if (ctrl.data.animation.current.anims) {
     animation = ctrl.data.animation.current.anims[key];
   }
@@ -96,11 +98,19 @@ function renderPiece(ctrl, key, p) {
       if (!isUpdate) {
         el.cgRole = p.role;
         el.cgColor = p.color;
-        if (animation) p.cgAnimating = true;
+        if (dragging) p.cgDragging = true;
+        else if (animation) p.cgAnimating = true;
       }
     }
   };
-  if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
+  if (dragging) {
+    attrs.style[util.transformProp()] = util.translate([
+      draggable.pos[0] + draggable.dec[0],
+      draggable.pos[1] + draggable.dec[1]
+    ]);
+    attrs.className += ' dragging';
+  }
+  else if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   return {
     tag: 'piece',
     attrs: attrs

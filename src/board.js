@@ -21,6 +21,12 @@ function setPieces(data, pieces) {
   data.movable.dropped = [];
 }
 
+function setDragPiece(data, key, piece, dragOpts) {
+  data.pieces[key] = piece;
+  data.draggable.current = dragOpts;
+  data.draggable.current.piece = piece;
+}
+
 function setCheck(data, color) {
   var checkColor = color || data.turnColor;
   Object.keys(data.pieces).forEach(function(key) {
@@ -249,6 +255,7 @@ module.exports = {
   reset: reset,
   toggleOrientation: toggleOrientation,
   setPieces: setPieces,
+  setDragPiece: setDragPiece,
   setCheck: setCheck,
   selectSquare: selectSquare,
   setSelected: setSelected,
