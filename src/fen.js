@@ -3,40 +3,44 @@ var util = require('./util');
 var initial = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 
 var roles = {
-  p: "pawn",
-  r: "rook",
-  n: "knight",
-  b: "bishop",
-  q: "queen",
-  k: "king"
+  p: 'pawn',
+  r: 'rook',
+  n: 'knight',
+  b: 'bishop',
+  q: 'queen',
+  k: 'king'
 };
 
 var letters = {
-  pawn: "p",
-  rook: "r",
-  knight: "n",
-  bishop: "b",
-  queen: "q",
-  king: "k"
+  pawn: 'p',
+  rook: 'r',
+  knight: 'n',
+  bishop: 'b',
+  queen: 'q',
+  king: 'k'
 };
 
 function read(fen) {
   if (fen === 'start') fen = initial;
   var pieces = {};
-  fen.replace(/ .+$/, '').split('/').forEach(function(row, y) {
+  var first = fen.substr(0, fen.indexOf(' '));
+  var parts = first.split('/');
+  for (var i = 0, len = parts.length; i < len; i++) {
+    var row = parts[i];
     var x = 0;
-    row.split('').forEach(function(v) {
-      var nb = parseInt(v);
+    for (var j = 0, jlen = row.length; j < jlen; j++) {
+      var v = row[j];
+      var nb = parseInt(v, 10);
       if (nb) x += nb;
       else {
         x++;
-        pieces[util.pos2key([x, 8 - y])] = {
+        pieces[util.pos2key([x, 8 - i])] = {
           role: roles[v.toLowerCase()],
           color: v === v.toLowerCase() ? 'black' : 'white'
         };
       }
-    });
-  });
+    }
+  }
 
   return pieces;
 }
