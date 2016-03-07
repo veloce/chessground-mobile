@@ -23,7 +23,8 @@ var letters = {
 function read(fen) {
   if (fen === 'start') fen = initial;
   var pieces = {};
-  var first = fen.substr(0, fen.indexOf(' '));
+  var space = fen.indexOf(' ');
+  var first = space !== -1 ? fen.substr(0, space) : fen;
   var parts = first.split('/');
   for (var i = 0, len = parts.length; i < len; i++) {
     var row = parts[i];
