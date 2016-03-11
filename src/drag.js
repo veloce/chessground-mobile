@@ -35,6 +35,7 @@ function start(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
   e.preventDefault();
   e.stopPropagation();
+  e.stopImmediatePropagation();
   var previouslySelected = data.selected;
   var position = util.eventPosition(e);
   var bounds = data.bounds;
@@ -143,7 +144,11 @@ function move(data, e) {
 }
 
 function end(data, e) {
-  if (data.draggable.preventDefault) e.preventDefault();
+  if (data.draggable.preventDefault) {
+    e.preventDefault();
+  }
+  e.stopPropagation();
+  e.stopImmediatePropagation();
   var draggable = data.draggable;
   var orig = draggable.current ? draggable.current.orig : null;
   var dest;
