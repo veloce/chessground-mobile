@@ -259,7 +259,6 @@ function renderBoard(ctrl) {
 
         ctrl.data.scheduledAnimationFrame = false;
 
-        ctrl.data.bounds = el.getBoundingClientRect();
         ctrl.data.element = el;
         ctrl.data.render = function() {
           ctrl.data.scheduledAnimationFrame = false;

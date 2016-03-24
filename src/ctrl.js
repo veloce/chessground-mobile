@@ -65,6 +65,10 @@ function controller(cfg) {
     }.bind(this), 200);
   }.bind(this);
 
+  this.setBounds = function(bounds) {
+    this.data.bounds = bounds;
+  }.bind(this);
+
   // no need to debounce: resizable only by orientation change
   var onresize = function() {
     if (this.data.element) {

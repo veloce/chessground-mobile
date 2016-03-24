@@ -8,6 +8,7 @@ module.exports = function(controller) {
     getOrientation: function () {
       return controller.data.orientation;
     },
+    setBounds: controller.setBounds,
     getPieces: function() {
       return controller.data.pieces;
     },
