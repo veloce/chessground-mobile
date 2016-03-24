@@ -65,6 +65,8 @@ function controller(cfg) {
     }.bind(this), 200);
   }.bind(this);
 
+  // view-only needs only `width` and `height` props
+  // manipulables board needs also `top` and `left`
   this.setBounds = function(bounds) {
     this.data.bounds = bounds;
   }.bind(this);
