@@ -36,11 +36,13 @@ function setCheck(data, color) {
 
 function setPremove(data, orig, dest) {
   data.premovable.current = [orig, dest];
+  setTimeout(data.premovable.events.set.bind(undefined, orig, dest));
 }
 
 function unsetPremove(data) {
   if (data.premovable.current) {
     data.premovable.current = null;
+    setTimeout(data.premovable.events.unset);
   }
 }
 
