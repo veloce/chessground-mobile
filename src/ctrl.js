@@ -71,6 +71,12 @@ function controller(cfg) {
     this.data.bounds = bounds;
   }.bind(this);
 
+  this.setAutoShapes = function(shapes) {
+    anim(function(d) {
+      d.drawable.autoShapes = shapes;
+    }, this.data, false)();
+  }.bind(this);
+
   // no need to debounce: resizable only by orientation change
   var onresize = function() {
     if (this.data.element) {

@@ -95,6 +95,72 @@ module.exports = function(cfg) {
       // capturedPiece is null or like {color: 'white', 'role': 'queen'}
       move: function(orig, dest, capturedPiece) {},
       select: function(key) {} // called when a square is selected
+    },
+    drawable: {
+      enabled: false, // allows SVG drawings
+      onChange: function(shapes) {},
+      // user shapes
+      shapes: [
+        // {brush: 'green', orig: 'e8'},
+        // {brush: 'yellow', orig: 'c4', dest: 'f7'}
+      ],
+      // computer shapes
+      autoShapes: [
+        // {brush: 'paleBlue', orig: 'e8'},
+        // {brush: 'paleRed', orig: 'c4', dest: 'f7'}
+      ],
+      /*{ // current
+       *  orig: "a2", // orig key of drawing
+       *  pos: [20, -12] // relative current position
+       *  dest: "b3" // square being moused over
+       *  bounds: // current cached board bounds
+       *  brush: 'green' // brush name for shape
+       *}*/
+      current: {},
+      brushes: {
+        green: {
+          key: 'g',
+          color: '#15781B',
+          opacity: 1,
+          lineWidth: 10,
+          circleMargin: 0
+        },
+        red: {
+          key: 'r',
+          color: '#882020',
+          opacity: 1,
+          lineWidth: 10,
+          circleMargin: 1
+        },
+        blue: {
+          key: 'b',
+          color: '#003088',
+          opacity: 1,
+          lineWidth: 10,
+          circleMargin: 2
+        },
+        yellow: {
+          key: 'y',
+          color: '#e68f00',
+          opacity: 1,
+          lineWidth: 10,
+          circleMargin: 3
+        },
+        paleBlue: {
+          key: 'pb',
+          color: '#003088',
+          opacity: 0.3,
+          lineWidth: 15,
+          circleMargin: 0
+        },
+        paleGreen: {
+          key: 'pg',
+          color: '#15781B',
+          opacity: 0.35,
+          lineWidth: 15,
+          circleMargin: 0
+        }
+      }
     }
   };
 
