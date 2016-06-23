@@ -81,9 +81,11 @@ piece {
   transform: translate3d(0,0,0);
 }
 piece.dragging {
+  z-index: 9;
+}
+piece.dragging.magnified {
   width: 200%;
   height: 200%;
-  z-index: 9;
 }
 .minimal-dom piece {
   position: absolute;

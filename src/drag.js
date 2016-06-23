@@ -31,6 +31,20 @@ function removeSquareTarget(data) {
   }
 }
 
+function computeSquareBounds(data, bounds, key) {
+  var pos = util.key2pos(key);
+  if (data.orientation !== 'white') {
+    pos[0] = 9 - pos[0];
+    pos[1] = 9 - pos[1];
+  }
+  return {
+    left: bounds.left + bounds.width * (pos[0] - 1) / 8,
+    top: bounds.top + bounds.height * (8 - pos[1]) / 8,
+    width: bounds.width / 8,
+    height: bounds.height / 8
+  };
+}
+
 function start(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
   e.preventDefault();
@@ -45,6 +59,7 @@ function start(data, e) {
   var stillSelected = data.selected === orig;
   if (data.pieces[orig] && stillSelected && board.isDraggable(data, orig)) {
     var bpos = util.boardpos(util.key2pos(orig), data.orientation === 'white');
+    var squareBounds = computeSquareBounds(data, bounds, orig);
     data.draggable.current = {
       previouslySelected: previouslySelected,
       orig: orig,
@@ -52,9 +67,12 @@ function start(data, e) {
       rel: position,
       epos: position,
       pos: [0, 0],
-      dec: [
+      dec: data.draggable.magnified ? [
         position[0] - (bounds.left + (bounds.width * bpos.left / 100) + (bounds.width * 0.25) / 2),
         position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) + 10)
+      ] : [
+        position[0] - (squareBounds.left + squareBounds.width / 2),
+        position[1] - (squareBounds.top + squareBounds.height / 2)
       ],
       bounds: bounds,
       started: false,
@@ -63,7 +81,7 @@ function start(data, e) {
       originTarget: e.target,
       scheduledAnimationFrame: false
     };
-    if (data.draggable.centerPiece) {
+    if (data.draggable.magnified && data.draggable.centerPiece) {
       data.draggable.current.dec[1] = position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) - (bounds.height * 0.25) / 2);
     }
     hold.start();
@@ -137,6 +155,9 @@ function move(data, e) {
     if (!cur.started && util.distance(cur.epos, cur.rel) >= data.draggable.distance) {
       cur.started = true;
       cur.draggingPiece.classList.add('dragging');
+      if (data.draggable.magnified) {
+        cur.draggingPiece.classList.add('magnified');
+      }
       cur.draggingPiece.cgDragging = true;
       processDrag(data);
     }

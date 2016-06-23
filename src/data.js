@@ -18,7 +18,6 @@ module.exports = function(cfg) {
     autoCastle: false, // immediately complete the castle by moving the rook after king move
     viewOnly: false, // don't bind events: the user will never be able to move pieces around
     minimalDom: false, // don't use square elements. Optimization to use only with viewOnly
-    disableContextMenu: false, // because who needs a context menu on a chessboard
     highlight: {
       lastMove: true, // add last-move class to squares
       check: true // add check class to squares
@@ -76,7 +75,8 @@ module.exports = function(cfg) {
       enabled: true, // allow moves & premoves to use drag'n drop
       distance: 3, // minimum distance to initiate a drag, in pixels
       squareTarget: true, // display a shadow target under piece
-      centerPiece: false, // center the piece under finger (otherwise shifted up)
+      magnified: true, // whether dragging piece is magnified
+      centerPiece: false, // when magnified, center the piece under finger (otherwise shifted up)
       preventDefault: true, // whether to prevent default on move and end
       /*{ // current
        *  orig: "a2", // orig key of dragging piece

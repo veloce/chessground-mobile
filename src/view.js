@@ -38,6 +38,7 @@ function rerenderBoard(ctrl) {
         // if piece not being dragged, remove dragging style
         if (!dragging && curPieceNode.cgDragging) {
           curPieceNode.classList.remove('dragging');
+          curPieceNode.classList.remove('magnified');
           curPieceNode.removeAttribute('style');
           curPieceNode.cgDragging = false;
         }
