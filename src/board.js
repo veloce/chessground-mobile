@@ -11,6 +11,7 @@ function reset(data) {
   data.lastMove = null;
   setSelected(data, null);
   unsetPremove(data);
+  unsetPredrop(data);
 }
 
 function setPieces(data, pieces) {
@@ -35,6 +36,7 @@ function setCheck(data, color) {
 }
 
 function setPremove(data, orig, dest) {
+  unsetPredrop(data);
   data.premovable.current = [orig, dest];
   setTimeout(data.premovable.events.set.bind(undefined, orig, dest));
 }
@@ -301,6 +303,7 @@ function playPredrop(data, validate) {
 
 function cancelMove(data) {
   unsetPremove(data);
+  unsetPredrop(data);
   selectSquare(data, null);
 }
 
