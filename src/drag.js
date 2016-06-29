@@ -162,7 +162,7 @@ function end(data, e) {
   e.stopImmediatePropagation();
   var draggable = data.draggable;
   var orig = draggable.current ? draggable.current.orig : null;
-  var dest;
+  var dest = draggable.current.over;
   // comparing with the origin target is an easy way to test that the end event
   // has the same touch origin
   if (e && e.type === 'touchend' && draggable.current.originTarget !== e.target &&
@@ -181,7 +181,6 @@ function end(data, e) {
     if (draggable.current.newPiece) {
       board.dropNewPiece(data, orig, dest);
     } else {
-      dest = draggable.current.over;
       if (orig !== dest) data.movable.dropped = [orig, dest];
       board.userMove(data, orig, dest);
     }
