@@ -140,13 +140,14 @@ function renderCapturedDom(p) {
 }
 
 function squareClass(ctrl, key, piece) {
+  var d = ctrl.data;
   return key + ' ' + util.classSet({
-    'selected': ctrl.data.selected === key,
-    'check': ctrl.data.highlight.check && ctrl.data.check === key,
-    'last-move': ctrl.data.highlight.lastMove && util.contains2(ctrl.data.lastMove, key),
-    'move-dest': ctrl.data.movable.showDests && util.containsX(ctrl.data.movable.dests[ctrl.data.selected], key),
-    'premove-dest': ctrl.data.premovable.showDests && util.containsX(ctrl.data.premovable.dests, key),
-    'current-premove': util.contains2(ctrl.data.premovable.current, key),
+    'selected': d.selected === key,
+    'check': d.highlight.check && d.check === key,
+    'last-move': d.highlight.lastMove && util.contains2(d.lastMove, key),
+    'move-dest': d.movable.showDests && util.containsX(d.movable.dests[d.selected], key),
+    'premove-dest': d.premovable.showDests && util.containsX(d.premovable.dests, key),
+    'current-premove': key === d.predroppable.current.key || util.contains2(d.premovable.current, key),
     'occupied': !!piece,
     'exploding': ctrl.vm.exploding && ctrl.vm.exploding.indexOf(key) !== -1
   });

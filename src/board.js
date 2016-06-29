@@ -46,6 +46,22 @@ function unsetPremove(data) {
   }
 }
 
+function setPredrop(data, role, key) {
+  unsetPremove(data);
+  data.predroppable.current = {
+    role: role,
+    key: key
+  };
+  setTimeout(data.predroppable.events.set.bind(undefined, role, key));
+}
+
+function unsetPredrop(data) {
+  if (data.predroppable.current.key) {
+    data.predroppable.current = {};
+    setTimeout(data.predroppable.events.unset);
+  }
+}
+
 function tryAutoCastle(data, orig, dest) {
   if (!data.autoCastle) return;
   var king = data.pieces[dest];
@@ -94,6 +110,20 @@ function baseMove(data, orig, dest) {
   return true;
 }
 
+function baseNewPiece(data, piece, key) {
+  if (data.pieces[key]) return false;
+  setTimeout(function() { return data.events.dropNewPiece(piece, key); });
+  data.pieces[key] = piece;
+  data.lastMove = [key, key];
+  data.check = null;
+  setTimeout(data.events.change);
+  data.movable.dropped = [];
+  data.movable.dests = {};
+  data.turnColor = util.opposite(data.turnColor);
+  data.renderRAF();
+  return true;
+}
+
 function baseUserMove(data, orig, dest) {
   var result = anim(function() {
     return baseMove(data, orig, dest);
@@ -108,6 +138,10 @@ function baseUserMove(data, orig, dest) {
 
 function apiMove(data, orig, dest) {
   return baseMove(data, orig, dest);
+}
+
+function apiNewPiece(data, piece, key) {
+  return baseNewPiece(data, piece, key);
 }
 
 function userMove(data, orig, dest) {
@@ -133,6 +167,27 @@ function userMove(data, orig, dest) {
   } else if (isMovable(data, dest) || isPremovable(data, dest))
     setSelected(data, dest);
   else setSelected(data, null);
+}
+
+function dropNewPiece(data, orig, dest) {
+  if (canDrop(data, orig, dest)) {
+    var piece = data.pieces[orig];
+    delete data.pieces[orig];
+    baseNewPiece(data, piece, dest);
+    data.movable.dropped = [];
+    setTimeout(function() {
+      return data.movable.events.afterNewPiece(piece.role, dest, {
+        predrop: false
+      });
+    });
+  } else if (canPredrop(data, orig, dest)) {
+    setPredrop(data, data.pieces[orig].role, dest);
+  } else {
+    unsetPremove(data);
+    unsetPredrop(data);
+  }
+  delete data.pieces[orig];
+  setSelected(data, null);
 }
 
 function selectSquare(data, key) {
@@ -166,6 +221,15 @@ function canMove(data, orig, dest) {
   );
 }
 
+function canDrop(data, orig, dest) {
+  var piece = data.pieces[orig];
+  return piece && dest && (orig === dest || !data.pieces[dest]) && (
+    data.movable.color === 'both' || (
+      data.movable.color === piece.color &&
+      data.turnColor === piece.color
+    ));
+}
+
 function isPremovable(data, orig) {
   var piece = data.pieces[orig];
   return piece && data.premovable.enabled &&
@@ -177,6 +241,16 @@ function canPremove(data, orig, dest) {
   return orig !== dest &&
     isPremovable(data, orig) &&
     util.containsX(premove(data.pieces, orig, data.premovable.castle), dest);
+}
+
+function canPredrop(data, orig, dest) {
+  var piece = data.pieces[orig];
+  return piece && dest &&
+    (!data.pieces[dest] || data.pieces[dest].color !== data.movable.color) &&
+    data.predroppable.enabled &&
+    (piece.role !== 'pawn' || (dest[1] !== '1' && dest[1] !== '8')) &&
+    data.movable.color === piece.color &&
+    data.turnColor !== piece.color;
 }
 
 function isDraggable(data, orig) {
@@ -205,6 +279,26 @@ function playPremove(data) {
   unsetPremove(data);
 }
 
+function playPredrop(data, validate) {
+  var drop = data.predroppable.current,
+    success = false;
+  if (!drop.key) return success;
+  if (validate(drop)) {
+    var piece = {
+      role: drop.role,
+      color: data.movable.color
+    };
+    if (baseNewPiece(data, piece, drop.key)) {
+      setTimeout(function() { return data.movable.events.afterNewPiece(drop.role, drop.key, {
+        predrop: true
+      }); });
+      success = true;
+    }
+  }
+  unsetPredrop(data);
+  return success;
+}
+
 function cancelMove(data) {
   unsetPremove(data);
   selectSquare(data, null);
@@ -223,7 +317,10 @@ function getKeyAtDomPos(data, pos, bounds) {
   file = data.orientation === 'white' ? file : 9 - file;
   var rank = Math.ceil(8 - (8 * ((pos[1] - bounds.top) / bounds.height)));
   rank = data.orientation === 'white' ? rank : 9 - rank;
-  if (file > 0 && file < 9 && rank > 0 && rank < 9) return util.pos2key([file, rank]);
+  if (file > 0 && file < 9 && rank > 0 && rank < 9) {
+    return util.pos2key([file, rank]);
+  }
+  return null;
 }
 
 // {white: {pawn: 3 queen: 1}, black: {bishop: 2}}
@@ -264,9 +361,13 @@ module.exports = {
   isDraggable: isDraggable,
   canMove: canMove,
   userMove: userMove,
+  dropNewPiece: dropNewPiece,
   apiMove: apiMove,
+  apiNewPiece: apiNewPiece,
   playPremove: playPremove,
+  playPredrop: playPredrop,
   unsetPremove: unsetPremove,
+  unsetPredrop: unsetPredrop,
   cancelMove: cancelMove,
   stop: stop,
   getKeyAtDomPos: getKeyAtDomPos,

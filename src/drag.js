@@ -55,6 +55,7 @@ function start(data, e) {
   var bounds = data.bounds;
   var orig = board.getKeyAtDomPos(data, position, bounds);
   var hadPremove = !!data.premovable.current;
+  var hadPredrop = !!data.predroppable.current.key;
   board.selectSquare(data, orig);
   var stillSelected = data.selected === orig;
   if (data.pieces[orig] && stillSelected && board.isDraggable(data, orig)) {
@@ -85,7 +86,10 @@ function start(data, e) {
       data.draggable.current.dec[1] = position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) - (bounds.height * 0.25) / 2);
     }
     hold.start();
-  } else if (hadPremove) board.unsetPremove(data);
+  } else {
+    if (hadPremove) board.unsetPremove(data);
+    if (hadPredrop) board.unsetPredrop(data);
+  }
   data.renderRAF();
 }
 
@@ -175,7 +179,9 @@ function end(data, e) {
   var dest;
   // comparing with the origin target is an easy way to test that the end event
   // has the same touch origin
-  if (e && e.type === 'touchend' && draggable.current.originTarget !== e.target) {
+  if (e && e.type === 'touchend' && draggable.current.originTarget !== e.target &&
+    !draggable.current.newPiece) {
+    draggable.current = {};
     return;
   }
   if (!orig) {
@@ -184,10 +190,15 @@ function end(data, e) {
   }
   removeSquareTarget(data);
   board.unsetPremove(data);
+  board.unsetPredrop(data);
   if (draggable.current.started) {
-    dest = draggable.current.over;
-    if (orig !== dest) data.movable.dropped = [orig, dest];
-    board.userMove(data, orig, dest);
+    if (draggable.current.newPiece) {
+      board.dropNewPiece(data, orig, dest);
+    } else {
+      dest = draggable.current.over;
+      if (orig !== dest) data.movable.dropped = [orig, dest];
+      board.userMove(data, orig, dest);
+    }
     data.renderRAF();
   } else if (draggable.current.previouslySelected === orig) {
     board.setSelected(data, null);

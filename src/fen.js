@@ -31,6 +31,7 @@ function read(fen) {
     var x = 0;
     for (var j = 0, jlen = row.length; j < jlen; j++) {
       var v = row[j];
+      if (v === '~') continue;
       var nb = parseInt(v, 10);
       if (nb) x += nb;
       else {

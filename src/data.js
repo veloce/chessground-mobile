@@ -57,7 +57,8 @@ module.exports = function(cfg) {
       dropped: [], // last dropped [orig, dest], not to be animated
       showDests: true, // whether to add the move-dest class on squares
       events: {
-        after: function(orig, dest, metadata) {} // called after the move has been played
+        after: function(orig, dest, metadata) {}, // called after the move has been played
+        afterNewPiece: function(role, pos) {} // called after a new piece is dropped on the board
       }
     },
     premovable: {
@@ -69,6 +70,14 @@ module.exports = function(cfg) {
       events: {
         set: function(orig, dest) {}, // called after the premove has been set
         unset: function() {} // called after the premove has been unset
+      }
+    },
+    predroppable: {
+      enabled: false, // allow predrops for color that can not move
+      current: {}, // current saved predrop {role: 'knight', key: 'e4'} | {}
+      events: {
+        set: function(role, key) {}, // called after the predrop has been set
+        unset: function() {} // called after the predrop has been unset
       }
     },
     draggable: {
@@ -93,8 +102,7 @@ module.exports = function(cfg) {
       change: function() {}, // called after the situation changes on the board
       // called after a piece has been moved.
       // capturedPiece is null or like {color: 'white', 'role': 'queen'}
-      move: function(orig, dest, capturedPiece) {},
-      select: function(key) {} // called when a square is selected
+      move: function(orig, dest, capturedPiece) {}
     }
   };
 
