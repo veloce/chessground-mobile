@@ -31,20 +31,6 @@ function removeSquareTarget(data) {
   }
 }
 
-function computeSquareBounds(data, bounds, key) {
-  var pos = util.key2pos(key);
-  if (data.orientation !== 'white') {
-    pos[0] = 9 - pos[0];
-    pos[1] = 9 - pos[1];
-  }
-  return {
-    left: bounds.left + bounds.width * (pos[0] - 1) / 8,
-    top: bounds.top + bounds.height * (8 - pos[1]) / 8,
-    width: bounds.width / 8,
-    height: bounds.height / 8
-  };
-}
-
 function start(data, e) {
   if (e.touches && e.touches.length > 1) return; // support one finger touch only
   e.preventDefault();
@@ -60,7 +46,7 @@ function start(data, e) {
   var stillSelected = data.selected === orig;
   if (data.pieces[orig] && stillSelected && board.isDraggable(data, orig)) {
     var bpos = util.boardpos(util.key2pos(orig), data.orientation === 'white');
-    var squareBounds = computeSquareBounds(data, bounds, orig);
+    var squareBounds = util.computeSquareBounds(data.orientation, bounds, orig);
     data.draggable.current = {
       previouslySelected: previouslySelected,
       orig: orig,

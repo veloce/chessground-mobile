@@ -97,6 +97,20 @@ function isRightButton(e) {
   return e.buttons === 2 || e.button === 2;
 }
 
+function computeSquareBounds(orientation, bounds, key) {
+  var pos = key2pos(key);
+  if (orientation !== 'white') {
+    pos[0] = 9 - pos[0];
+    pos[1] = 9 - pos[1];
+  }
+  return {
+    left: bounds.left + bounds.width * (pos[0] - 1) / 8,
+    top: bounds.top + bounds.height * (8 - pos[1]) / 8,
+    width: bounds.width / 8,
+    height: bounds.height / 8
+  };
+}
+
 module.exports = {
   files: files,
   ranks: ranks,
@@ -118,5 +132,6 @@ module.exports = {
   partialApply: partialApply,
   partial: partial,
   transformProp: transformProp,
-  isRightButton: isRightButton
+  isRightButton: isRightButton,
+  computeSquareBounds: computeSquareBounds
 };
