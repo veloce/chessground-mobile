@@ -39,7 +39,11 @@ function controller(cfg) {
 
   }, this.data);
 
-  this.apiNewPiece = anim(board.apiNewPiece, this.data);
+  this.apiNewPiece = anim(function(curData, piece, key, config) {
+    board.apiNewPiece(curData, piece, key);
+    configure(curData, config);
+
+  }, this.data);
 
   this.playPremove = anim(board.playPremove, this.data);
 
