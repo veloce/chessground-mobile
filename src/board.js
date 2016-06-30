@@ -314,10 +314,9 @@ function stop(data) {
 }
 
 function getKeyAtDomPos(data, pos, bounds) {
-  if (!bounds && !data.bounds) {
-    throw new Error('function getKeyAtDomPos require bounds');
+  if (typeof bounds !== 'object') {
+    throw new Error('function getKeyAtDomPos require bounds object arg');
   }
-  bounds = bounds || data.bounds; // use provided value, or get it from data
   var file = Math.ceil(8 * ((pos[0] - bounds.left) / bounds.width));
   file = data.orientation === 'white' ? file : 9 - file;
   var rank = Math.ceil(8 - (8 * ((pos[1] - bounds.top) / bounds.height)));
