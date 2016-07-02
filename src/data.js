@@ -102,7 +102,8 @@ module.exports = function(cfg) {
       change: function() {}, // called after the situation changes on the board
       // called after a piece has been moved.
       // capturedPiece is null or like {color: 'white', 'role': 'queen'}
-      move: function(orig, dest, capturedPiece) {}
+      move: function(orig, dest, capturedPiece) {},
+      dropNewPiece: function(role, pos) {}
     }
   };
 
