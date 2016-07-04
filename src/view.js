@@ -283,6 +283,8 @@ function renderBoard(ctrl) {
         };
 
         bindEvents(ctrl, el);
+
+        ctrl.data.prevOrientation = ctrl.data.orientation;
         ctrl.data.render();
       }
     },
