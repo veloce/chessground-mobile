@@ -97,6 +97,8 @@ function controller(cfg) {
   }
 
   this.onunload = function() {
+    this.cancelMove();
+    this.stop();
     if (!this.data.viewOnly) {
       window.removeEventListener('resize', onresize);
     }
