@@ -5,7 +5,7 @@ var configure = require('./configure');
 var anim = require('./anim');
 var drag = require('./drag');
 
-function controller(cfg) {
+module.exports = function(cfg) {
 
   this.data = data(cfg);
 
@@ -103,6 +103,4 @@ function controller(cfg) {
       window.removeEventListener('resize', onresize);
     }
   };
-}
-
-module.exports = controller;
+};

@@ -1,6 +1,58 @@
 var drag = require('./drag');
 var util = require('./util');
 var m = require('mithril');
+var Node = require('mithril/render/node');
+
+module.exports = function renderBoard(ctrl) {
+  return Node(
+    'div',
+    undefined,
+    {
+      className: [
+        'cg-board orientation-' + ctrl.data.orientation,
+        ctrl.data.viewOnly ? 'view-only' : 'manipulable',
+        ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
+      ].join(' '),
+      oncreate: function(vnode) {
+        const el = vnode.dom;
+
+        if (!ctrl.data.bounds) {
+          ctrl.data.bounds = el.getBoundingClientRect();
+        }
+
+        ctrl.data.scheduledAnimationFrame = false;
+
+        ctrl.data.element = el;
+        ctrl.data.render = function() {
+          ctrl.data.scheduledAnimationFrame = false;
+          if (ctrl.data.minimalDom) {
+            m.render(el, renderContent(ctrl));
+          } else {
+            if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
+              m.render(el, [renderContent(ctrl)]);
+              ctrl.data.prevOrientation = ctrl.data.orientation;
+              rerenderBoard(ctrl);
+            } else {
+              rerenderBoard(ctrl);
+            }
+          }
+        };
+        ctrl.data.renderRAF = function() {
+          if (!ctrl.data.scheduledAnimationFrame) {
+            ctrl.data.scheduledAnimationFrame = requestAnimationFrame(ctrl.data.render);
+          }
+        };
+
+        bindEvents(ctrl, el);
+
+        ctrl.data.prevOrientation = ctrl.data.orientation;
+      }
+    },
+    renderContent(ctrl),
+    undefined,
+    undefined
+  );
+};
 
 function rerenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
@@ -95,13 +147,12 @@ function renderPiece(ctrl, key, p) {
     className: pieceClass(p),
     cgRole: p.role,
     cgColor: p.color,
-    config: function(el, isUpdate) {
-      if (!isUpdate) {
-        el.cgRole = p.role;
-        el.cgColor = p.color;
-        if (dragging) p.cgDragging = true;
-        else if (animation) p.cgAnimating = true;
-      }
+    oncreate: function(vnode) {
+      const el = vnode.dom;
+      el.cgRole = p.role;
+      el.cgColor = p.color;
+      if (dragging) p.cgDragging = true;
+      else if (animation) p.cgAnimating = true;
     }
   };
   if (dragging) {
@@ -112,10 +163,14 @@ function renderPiece(ctrl, key, p) {
     attrs.className += ' dragging';
   }
   else if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
-  return {
-    tag: 'piece',
-    attrs: attrs
-  };
+  return Node(
+    'piece',
+    undefined,
+    attrs,
+    undefined,
+    undefined,
+    undefined
+  );
 }
 
 function renderPieceDom(vdom) {
@@ -165,10 +220,8 @@ function renderSquare(ctrl, pos, asWhite) {
       left: bpos.left + '%',
       bottom: bpos.bottom + '%'
     },
-    config: function(el, isUpdate) {
-      if (!isUpdate) {
-        ctrl.data.squareEls[key] = el;
-      }
+    oncreate: function(vnode) {
+      ctrl.data.squareEls[key] = vnode.dom;
     }
   };
   if (ctrl.data.coordinates) {
@@ -179,11 +232,14 @@ function renderSquare(ctrl, pos, asWhite) {
   if (piece) {
     children.push(renderPiece(ctrl, key, piece));
   }
-  return {
-    tag: 'square',
-    attrs: attrs,
-    children: children
-  };
+  return Node(
+    'square',
+    undefined,
+    attrs,
+    children,
+    undefined,
+    undefined
+  );
 }
 
 function renderMinimalDom(ctrl, asWhite) {
@@ -246,50 +302,3 @@ function bindEvents(ctrl, el) {
     el.addEventListener('touchcancel', oncancel);
   }
 }
-
-function renderBoard(ctrl) {
-  return {
-    tag: 'div',
-    attrs: {
-      className: [
-        'cg-board orientation-' + ctrl.data.orientation,
-        ctrl.data.viewOnly ? 'view-only' : 'manipulable',
-        ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
-      ].join(' '),
-      config: function(el, isUpdate) {
-        if (isUpdate) return;
-
-        ctrl.data.scheduledAnimationFrame = false;
-
-        ctrl.data.element = el;
-        ctrl.data.render = function() {
-          ctrl.data.scheduledAnimationFrame = false;
-          if (ctrl.data.minimalDom) {
-            m.render(el, renderContent(ctrl));
-          } else {
-            if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
-              m.render(el, renderContent(ctrl), true);
-              ctrl.data.prevOrientation = ctrl.data.orientation;
-              rerenderBoard(ctrl);
-            } else {
-              rerenderBoard(ctrl);
-            }
-          }
-        };
-        ctrl.data.renderRAF = function() {
-          if (!ctrl.data.scheduledAnimationFrame) {
-            ctrl.data.scheduledAnimationFrame = requestAnimationFrame(ctrl.data.render);
-          }
-        };
-
-        bindEvents(ctrl, el);
-
-        ctrl.data.prevOrientation = ctrl.data.orientation;
-        ctrl.data.render();
-      }
-    },
-    children: renderContent(ctrl)
-  };
-}
-
-module.exports = renderBoard;

@@ -4,7 +4,7 @@ var view = require('./view');
 var api = require('./api');
 
 function render(element, controller) {
-  m.render(element, view(controller), true);
+  m.render(element, [view(controller)]);
 }
 
 // for usage outside of mithril

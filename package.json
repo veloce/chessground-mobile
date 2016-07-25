@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "merge": "1.2.0",
-    "mithril": "veloce/mithril.js#v8opt"
+    "mithril": "lhorie/mithril.js#rewrite"
   },
   "devDependencies": {
     "browserify": "~9.0.8",
