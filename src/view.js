@@ -1,10 +1,10 @@
 var drag = require('./drag');
 var util = require('./util');
 var m = require('mithril');
-var Node = require('mithril/render/node');
+var Vnode = require('mithril/render/vnode');
 
 module.exports = function renderBoard(ctrl) {
-  return Node(
+  return Vnode(
     'div',
     undefined,
     {
@@ -85,7 +85,7 @@ function rerenderBoard(ctrl) {
     }
     // there is a piece at this square
     if (piece) {
-      // a piece node is already there
+      // a piece Vnode is already there
       if (curPieceNode) {
         // if piece not being dragged, remove dragging style
         if (!dragging && curPieceNode.cgDragging) {
@@ -163,7 +163,7 @@ function renderPiece(ctrl, key, p) {
     attrs.className += ' dragging';
   }
   else if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
-  return Node(
+  return Vnode(
     'piece',
     undefined,
     attrs,
@@ -232,7 +232,7 @@ function renderSquare(ctrl, pos, asWhite) {
   if (piece) {
     children.push(renderPiece(ctrl, key, piece));
   }
-  return Node(
+  return Vnode(
     'square',
     undefined,
     attrs,
