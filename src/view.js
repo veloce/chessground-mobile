@@ -6,7 +6,7 @@ var Vnode = require('mithril/render/vnode');
 module.exports = function renderBoard(ctrl) {
   return Vnode(
     'div',
-    undefined,
+    null,
     {
       className: [
         'cg-board orientation-' + ctrl.data.orientation,
@@ -29,9 +29,9 @@ module.exports = function renderBoard(ctrl) {
             m.render(el, renderContent(ctrl));
           } else {
             if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
-              m.render(el, [renderContent(ctrl)]);
-              ctrl.data.prevOrientation = ctrl.data.orientation;
+              m.render(el, renderContent(ctrl));
               rerenderBoard(ctrl);
+              ctrl.data.prevOrientation = ctrl.data.orientation;
             } else {
               rerenderBoard(ctrl);
             }
@@ -165,7 +165,7 @@ function renderPiece(ctrl, key, p) {
   else if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   return Vnode(
     'piece',
-    undefined,
+    null,
     attrs,
     undefined,
     undefined,
@@ -234,7 +234,7 @@ function renderSquare(ctrl, pos, asWhite) {
   }
   return Vnode(
     'square',
-    undefined,
+    key,
     attrs,
     children,
     undefined,
@@ -247,16 +247,15 @@ function renderMinimalDom(ctrl, asWhite) {
   if (ctrl.data.lastMove) ctrl.data.lastMove.forEach(function(key) {
     var pos = util.key2pos(key);
     var bpos = util.boardpos(pos, asWhite);
-    children.push({
-      tag: 'square',
-      attrs: {
-        className: 'last-move',
-        style: {
-          left: bpos.left + '%',
-          bottom: bpos.bottom + '%'
-        }
+    var attrs = {
+      className: 'last-move',
+      style: {
+        left: bpos.left + '%',
+        bottom: bpos.bottom + '%'
       }
-    });
+    };
+    var node = Vnode('square', null, attrs, undefined, undefined, undefined);
+    children.push(node);
   });
   var piecesKeys = Object.keys(ctrl.data.pieces);
   for (var i = 0, len = piecesKeys.length; i < len; i++) {

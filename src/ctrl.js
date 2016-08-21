@@ -96,7 +96,7 @@ module.exports = function(cfg) {
     window.addEventListener('resize', onresize);
   }
 
-  this.onunload = function() {
+  this.unload = function() {
     this.cancelMove();
     this.stop();
     if (!this.data.viewOnly) {
