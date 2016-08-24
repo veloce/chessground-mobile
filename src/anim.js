@@ -33,7 +33,7 @@ function computePlan(prev, current) {
     height = bounds.height / 8,
     anims = {},
     animedOrigs = [],
-    fadings = {},
+    capturedPieces = {},
     missings = [],
     news = [],
     invert = prev.orientation !== current.orientation,
@@ -74,7 +74,7 @@ function computePlan(prev, current) {
   });
   missings.forEach(function(p) {
     if (p.key !== current.movable.dropped[0] && !util.containsX(animedOrigs, p.key)) {
-      fadings[p.key] = {
+      capturedPieces[p.key] = {
         role: p.role,
         color: p.color
       };
@@ -83,7 +83,7 @@ function computePlan(prev, current) {
 
   return {
     anims: anims,
-    fadings: fadings
+    capturedPieces: capturedPieces
   };
 }
 
@@ -129,13 +129,13 @@ function animate(transformation, data) {
   }
   var result = transformation();
   var plan = computePlan(prev, data);
-  if (Object.keys(plan.anims).length > 0 || plan.fadings.length > 0) {
+  if (Object.keys(plan.anims).length > 0 || plan.capturedPieces.length > 0) {
     var alreadyRunning = data.animation.current.start;
     data.animation.current = {
       start: Date.now(),
       duration: data.animation.duration,
       anims: plan.anims,
-      fadings: plan.fadings,
+      capturedPieces: plan.capturedPieces,
       animating: {}
     };
     if (!alreadyRunning) data.scheduledAnimationFrame = requestAnimationFrame(function() { return step(data); });

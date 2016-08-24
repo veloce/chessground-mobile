@@ -56,15 +56,15 @@ module.exports = function renderBoard(ctrl) {
 
 function rerenderBoard(ctrl) {
   var pieces = ctrl.data.pieces;
-  var fadings = ctrl.data.animation.current.fadings;
-  var key, piece, fading, squareNode, sqClass, anim, curPieceNode, dragging;
+  var capturedPieces = ctrl.data.animation.current.capturedPieces;
+  var key, piece, captured, squareNode, sqClass, anim, curPieceNode, dragging;
   var anims = ctrl.data.animation.current.anims;
   for (var i = 0, len = util.allKeys.length; i < len; i++) {
     key = util.allKeys[i];
     piece = pieces[key];
     anim = anims && anims[key];
     dragging = ctrl.data.draggable.current.orig === key;
-    fading = fadings && fadings[key];
+    captured = capturedPieces && capturedPieces[key];
     squareNode = ctrl.data.squareEls[key];
     curPieceNode = squareNode.firstChild;
     sqClass = squareClass(ctrl, key, piece);
@@ -78,10 +78,10 @@ function rerenderBoard(ctrl) {
     // update highlights
     if (squareNode.className !== sqClass) squareNode.className = sqClass;
 
-    // remove previous fading if any when animation is finished
-    if (!fading) {
-      var fadingPieceEls = squareNode.getElementsByClassName('fading');
-      while (fadingPieceEls[0]) squareNode.removeChild(fadingPieceEls[0]);
+    // remove previous captured if any when animation is finished
+    if (!captured) {
+      var capturedEls = squareNode.getElementsByClassName('captured');
+      while (capturedEls[0]) squareNode.removeChild(capturedEls[0]);
     }
     // there is a piece at this square
     if (piece) {
@@ -111,12 +111,11 @@ function rerenderBoard(ctrl) {
         // different pieces: remove old piece and put new one
         else {
           squareNode.replaceChild(renderPieceDom(renderPiece(ctrl, key, piece)), curPieceNode);
-          // during an animation we render a temporary 'fading' piece (the name
-          // is wrong because it's not fading, it's juste here)
-          // make sure there is no fading piece already (may happen with promotion)
-          fadingPieceEls = fadingPieceEls || squareNode.getElementsByClassName('fading');
-          if (fading && !fadingPieceEls[0]) {
-            squareNode.appendChild(renderCapturedDom(fading));
+          // during an animation we render a temporary 'captured' piece
+          // make sure there is no captured piece already (may happen with promotion)
+          capturedEls = capturedEls || squareNode.getElementsByClassName('captured');
+          if (captured && !capturedEls[0]) {
+            squareNode.appendChild(renderCapturedDom(captured));
           }
         }
       } // empty square before: just put the piece
@@ -190,7 +189,8 @@ function renderPieceDom(vdom) {
 
 function renderCapturedDom(p) {
   var cap = document.createElement('piece');
-  cap.className = pieceClass(p) + ' fading';
+  cap.className = pieceClass(p) + ' captured';
+  cap.cgCaptured = true;
   return cap;
 }
 

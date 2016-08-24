@@ -34,14 +34,6 @@ module.exports = function(cfg) {
        *      [-20, 37]  // animation current status
        *    ], ...
        *  },
-       *  fading: [
-       *    {
-       *      pos: [80, 120], // position relative to the board
-       *      opacity: 0.34,
-       *      role: 'rook',
-       *      color: 'black'
-       *    }
-       *  },
        *  animating: {
        *    a2: pieceDomEl,
        *    ...
