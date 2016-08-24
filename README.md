@@ -84,8 +84,14 @@ There are a few functions you can call on a Chessground instance:
 ### Setters
 
 ```js
-// reconfigure the instance. Accepts all options mentioned above (bar "viewOnly" & "minimalDom").
-// board will be animated accordingly, if animations are enabled.
+// reconfigure the board with above options.
+// Board will be animated accordingly, if animations are enabled.
+ground.reconfigure(options);
+
+// Sets dynamic options that changes during a game.
+// Accepts: 'fen', 'orientation', 'turnColor', 'check', 'lastMove', 'dests',
+// 'movableColor'.
+// Board will be animated accordingly, if animations are enabled.
 ground.set(options);
 
 // sets the king of this color in check

@@ -1,9 +1,44 @@
 var board = require('./board');
+var configure = require('./configure');
 var data = require('./data');
 var fen = require('./fen');
-var configure = require('./configure');
 var anim = require('./anim');
 var drag = require('./drag');
+
+var ttId;
+
+function setNewConfig(d, config) {
+
+  if (config.fen) {
+    d.pieces = fen.read(config.fen);
+  }
+
+  if (config.dests) {
+    d.movable.dests = config.dests;
+  }
+
+  if (config.movableColor) {
+    d.movable.color = config.movableColor;
+  }
+
+  ['orientation', 'turnColor', 'lastMove', 'check'].forEach(function (prop) {
+    if (config.hasOwnProperty(prop)) {
+      d[prop] = config[prop];
+    }
+  });
+
+  if (d.check === true) {
+    board.setCheck(d);
+  }
+
+  // fix move/premove dests
+  if (d.selected) {
+    board.setSelected(d, d.selected);
+  }
+
+  // forget about the last dropped piece
+  d.movable.dropped = [];
+}
 
 module.exports = function(cfg) {
 
@@ -17,7 +52,9 @@ module.exports = function(cfg) {
     return fen.write(this.data.pieces);
   }.bind(this);
 
-  this.set = anim(configure, this.data);
+  this.set = anim(setNewConfig, this.data);
+
+  this.reconfigure = anim(configure, this.data);
 
   this.toggleOrientation = anim(board.toggleOrientation, this.data);
 
@@ -35,13 +72,13 @@ module.exports = function(cfg) {
       board.setPieces(curData, pieces);
     }
 
-    configure(curData, config);
+    setNewConfig(curData, config);
 
   }, this.data);
 
   this.apiNewPiece = anim(function(curData, piece, key, config) {
     board.apiNewPiece(curData, piece, key);
-    configure(curData, config);
+    setNewConfig(curData, config);
 
   }, this.data);
 
@@ -86,7 +123,7 @@ module.exports = function(cfg) {
     if (this.data.element) {
       // oh my what an ugly hack
       clearTimeout(ttId);
-      var ttId = setTimeout(function() {
+      ttId = setTimeout(function() {
         this.data.bounds = this.data.element.getBoundingClientRect();
       }.bind(this), 100);
     }
