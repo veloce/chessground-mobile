@@ -7,7 +7,8 @@ var drag = require('./drag');
 
 var ttId;
 
-function setNewConfig(d, config) {
+function setNewBoardState(d, config) {
+  if (!config) return;
 
   if (config.fen) {
     d.pieces = fen.read(config.fen);
@@ -52,7 +53,7 @@ module.exports = function(cfg) {
     return fen.write(this.data.pieces);
   }.bind(this);
 
-  this.set = anim(setNewConfig, this.data);
+  this.set = anim(setNewBoardState, this.data);
 
   this.reconfigure = anim(configure, this.data);
 
@@ -72,13 +73,13 @@ module.exports = function(cfg) {
       board.setPieces(curData, pieces);
     }
 
-    setNewConfig(curData, config);
+    setNewBoardState(curData, config);
 
   }, this.data);
 
   this.apiNewPiece = anim(function(curData, piece, key, config) {
     board.apiNewPiece(curData, piece, key);
-    setNewConfig(curData, config);
+    setNewBoardState(curData, config);
 
   }, this.data);
 
