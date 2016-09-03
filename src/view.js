@@ -14,7 +14,7 @@ module.exports = function renderBoard(ctrl) {
         ctrl.data.minimalDom ? 'minimal-dom' : 'full-dom'
       ].join(' '),
       oncreate: function(vnode) {
-        const el = vnode.dom;
+        var el = vnode.dom;
 
         if (!ctrl.data.bounds) {
           ctrl.data.bounds = el.getBoundingClientRect();
@@ -147,7 +147,7 @@ function renderPiece(ctrl, key, p) {
     cgRole: p.role,
     cgColor: p.color,
     oncreate: function(vnode) {
-      const el = vnode.dom;
+      var el = vnode.dom;
       el.cgRole = p.role;
       el.cgColor = p.color;
       if (dragging) p.cgDragging = true;
