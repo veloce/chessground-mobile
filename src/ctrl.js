@@ -135,8 +135,6 @@ module.exports = function(cfg) {
   }
 
   this.unload = function() {
-    this.cancelMove();
-    this.stop();
     if (!this.data.viewOnly) {
       window.removeEventListener('resize', onresize);
     }
