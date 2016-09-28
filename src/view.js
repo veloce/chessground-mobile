@@ -29,7 +29,7 @@ module.exports = function renderBoard(ctrl) {
             m.render(el, renderContent(ctrl));
           } else {
             if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
-              m.render(el, renderContent(ctrl));
+              m.render(el, m.fragment({ key: ctrl.data.orientation }, renderContent(ctrl)));
               rerenderBoard(ctrl);
               ctrl.data.prevOrientation = ctrl.data.orientation;
             } else {
