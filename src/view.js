@@ -225,8 +225,14 @@ function renderSquare(ctrl, pos, asWhite) {
     }
   };
   if (ctrl.data.coordinates) {
-    if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-x'] = file;
-    if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-y'] = rank;
+    // Coordinates from white's perspective
+    if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-white-x'] = file;
+    if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-white-y'] = rank;
+    // Coordinates from black's perspectice
+    if (ctrl.data.symmetricCoordinates) {
+      if (pos[1] === (asWhite ? 8 : 1)) attrs['data-coord-black-x'] = file;
+      if (pos[0] === (asWhite ? 1 : 8)) attrs['data-coord-black-y'] = rank;
+    }
   }
   var children = [];
   if (piece) {
