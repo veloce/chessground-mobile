@@ -28,10 +28,13 @@ module.exports = function renderBoard(ctrl) {
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
-            if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
-              m.render(el, m.fragment({ key: ctrl.data.orientation }, renderContent(ctrl)));
+            if ((ctrl.data.prevOrientation !== ctrl.data.orientation) ||
+            (ctrl.data.prevSymmetricCoordinates !== ctrl.data.symmetricCoordinates)) {
+              var key = ctrl.data.orientation + '_' + ctrl.data.symmetricCoordinates;
+              m.render(el, m.fragment({ key: key }, renderContent(ctrl)));
               rerenderBoard(ctrl);
               ctrl.data.prevOrientation = ctrl.data.orientation;
+              ctrl.data.prevSymmetricCoordinates = ctrl.data.symmetricCoordinates;
             } else {
               rerenderBoard(ctrl);
             }
@@ -46,6 +49,7 @@ module.exports = function renderBoard(ctrl) {
         bindEvents(ctrl, el);
 
         ctrl.data.prevOrientation = ctrl.data.orientation;
+        ctrl.data.prevSymmetricCoordinates = ctrl.data.symmetricCoordinates;
       }
     },
     renderContent(ctrl),
