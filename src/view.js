@@ -28,10 +28,13 @@ module.exports = function renderBoard(ctrl) {
           if (ctrl.data.minimalDom) {
             m.render(el, renderContent(ctrl));
           } else {
-            if (ctrl.data.prevOrientation !== ctrl.data.orientation) {
-              m.render(el, m.fragment({ key: ctrl.data.orientation }, renderContent(ctrl)));
+            if ((ctrl.data.prevOrientation !== ctrl.data.orientation) ||
+            (ctrl.data.prevSymmetricCoordinates !== ctrl.data.symmetricCoordinates)) {
+              var key = ctrl.data.orientation + '_' + ctrl.data.symmetricCoordinates;
+              m.render(el, m.fragment({ key: key }, renderContent(ctrl)));
               rerenderBoard(ctrl);
               ctrl.data.prevOrientation = ctrl.data.orientation;
+              ctrl.data.prevSymmetricCoordinates = ctrl.data.symmetricCoordinates;
             } else {
               rerenderBoard(ctrl);
             }
@@ -46,6 +49,7 @@ module.exports = function renderBoard(ctrl) {
         bindEvents(ctrl, el);
 
         ctrl.data.prevOrientation = ctrl.data.orientation;
+        ctrl.data.prevSymmetricCoordinates = ctrl.data.symmetricCoordinates;
       }
     },
     renderContent(ctrl),
@@ -225,8 +229,14 @@ function renderSquare(ctrl, pos, asWhite) {
     }
   };
   if (ctrl.data.coordinates) {
-    if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-x'] = file;
-    if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-y'] = rank;
+    // Coordinates from white's perspective
+    if (pos[1] === (asWhite ? 1 : 8)) attrs['data-coord-white-x'] = file;
+    if (pos[0] === (asWhite ? 8 : 1)) attrs['data-coord-white-y'] = rank;
+    // Coordinates from black's perspectice
+    if (ctrl.data.symmetricCoordinates) {
+      if (pos[1] === (asWhite ? 8 : 1)) attrs['data-coord-black-x'] = file;
+      if (pos[0] === (asWhite ? 1 : 8)) attrs['data-coord-black-y'] = rank;
+    }
   }
   var children = [];
   if (piece) {
