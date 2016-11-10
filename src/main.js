@@ -20,6 +20,7 @@ function init(element, config) {
 module.exports = init;
 module.exports.render = render;
 module.exports.controller = ctrl;
+module.exports.view = view;
 module.exports.fen = require('./fen');
 module.exports.util = require('./util');
 module.exports.configure = require('./configure');
