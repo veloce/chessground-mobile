@@ -85,7 +85,6 @@ module.exports = function(cfg) {
        *  rel: [100, 170] // x, y of the piece at original position
        *  pos: [20, -12] // relative current position
        *  dec: [4, -8] // piece center decay
-       *  over: "b3" // square being moused over
        *  prevTarget: "b3" // prev square occupied by target
        *  started: whether the drag has started, as per the distance setting
        *}*/

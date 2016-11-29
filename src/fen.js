@@ -8,7 +8,13 @@ var roles = {
   n: 'knight',
   b: 'bishop',
   q: 'queen',
-  k: 'king'
+  k: 'king',
+  P: 'pawn',
+  R: 'rook',
+  N: 'knight',
+  B: 'bishop',
+  Q: 'queen',
+  K: 'king'
 };
 
 var letters = {
@@ -32,12 +38,12 @@ function read(fen) {
     for (var j = 0, jlen = row.length; j < jlen; j++) {
       var v = row[j];
       if (v === '~') continue;
-      var nb = parseInt(v, 10);
+      var nb = ~~v;
       if (nb) x += nb;
       else {
         x++;
         pieces[util.pos2key([x, 8 - i])] = {
-          role: roles[v.toLowerCase()],
+          role: roles[v],
           color: v === v.toLowerCase() ? 'black' : 'white'
         };
       }

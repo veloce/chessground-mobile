@@ -18,7 +18,7 @@ function renderSquareTarget(data, cur) {
   style.height = targetWidth + 'px';
   style.left = (-0.5 * squareWidth) + 'px';
   style.top = (-0.5 * squareWidth) + 'px';
-  style[util.transformProp()] = util.translate(vector);
+  style.transform = util.translate(vector);
   sq.className = 'cg-square-target';
   data.element.appendChild(sq);
   return sq;
@@ -28,6 +28,13 @@ function removeSquareTarget(data) {
   if (data.element) {
     var sqs = data.element.getElementsByClassName('cg-square-target');
     while (sqs[0]) sqs[0].parentNode.removeChild(sqs[0]);
+  }
+}
+
+function undoDomChanges(data) {
+  if (data.draggable.current.draggingPiece) {
+    data.draggable.current.draggingPiece.classList.remove('dragging');
+    data.draggable.current.draggingPiece.classList.remove('magnified');
   }
 }
 
@@ -47,6 +54,7 @@ function start(data, e) {
   if (data.pieces[orig] && stillSelected && board.isDraggable(data, orig)) {
     var bpos = util.boardpos(util.key2pos(orig), data.orientation === 'white');
     var squareBounds = util.computeSquareBounds(data.orientation, bounds, orig);
+    var origPos = util.key2pos(orig);
     data.draggable.current = {
       previouslySelected: previouslySelected,
       orig: orig,
@@ -54,6 +62,7 @@ function start(data, e) {
       rel: position,
       epos: position,
       pos: [0, 0],
+      origPos: origPos,
       dec: data.draggable.magnified ? [
         position[0] - (bounds.left + (bounds.width * bpos.left / 100) + (bounds.width * 0.25) / 2),
         position[1] - (bounds.top + bounds.height - (bounds.height * bpos.bottom / 100) + 10)
@@ -64,7 +73,7 @@ function start(data, e) {
       bounds: bounds,
       started: false,
       squareTarget: null,
-      draggingPiece: data.element.querySelector('.' + orig + ' > piece'),
+      draggingPiece: data.element.querySelector('.p' + orig),
       originTarget: e.target,
       scheduledAnimationFrame: false
     };
@@ -84,6 +93,7 @@ function processDrag(data) {
   data.draggable.current.scheduledAnimationFrame = true;
   requestAnimationFrame(function() {
     var cur = data.draggable.current;
+    var asWhite = data.orientation === 'white';
     cur.scheduledAnimationFrame = false;
     if (cur.orig) {
       // if moving piece is gone, cancel
@@ -112,21 +122,20 @@ function processDrag(data) {
         }
 
         // move piece
-        cur.draggingPiece.style[util.transformProp()] = util.translate([
-          cur.pos[0] + cur.dec[0],
-          cur.pos[1] + cur.dec[1]
-        ]);
+        var translate = util.posToTranslate(cur.origPos, asWhite, data.bounds);
+        translate[0] += cur.pos[0] + cur.dec[0];
+        translate[1] += cur.pos[1] + cur.dec[1];
+        cur.draggingPiece.style.transform = util.translate(translate);
 
         // move square target
         if (cur.over && cur.squareTarget && cur.over !== cur.prevTarget) {
           var squareWidth = cur.bounds.width / 8,
-          asWhite = data.orientation === 'white',
           stPos = util.key2pos(cur.over),
           vector = [
             (asWhite ? stPos[0] - 1 : 8 - stPos[0]) * squareWidth,
             (asWhite ? 8 - stPos[1] : stPos[1] - 1) * squareWidth
           ];
-          cur.squareTarget.style[util.transformProp()] = util.translate(vector);
+          cur.squareTarget.style.transform = util.translate(vector);
           cur.prevTarget = cur.over;
         }
       }
@@ -148,7 +157,6 @@ function move(data, e) {
       if (data.draggable.magnified) {
         cur.draggingPiece.classList.add('magnified');
       }
-      cur.draggingPiece.cgDragging = true;
       processDrag(data);
     }
   }
@@ -175,6 +183,7 @@ function end(data, e) {
     return;
   }
   removeSquareTarget(data);
+  undoDomChanges(data);
   board.unsetPremove(data);
   board.unsetPredrop(data);
   if (draggable.current.started) {
@@ -194,6 +203,7 @@ function end(data, e) {
 
 function cancel(data) {
   removeSquareTarget(data);
+  undoDomChanges(data);
   if (data.draggable.current.orig) {
     data.draggable.current = {};
     board.selectSquare(data, null);
