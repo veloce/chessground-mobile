@@ -3,7 +3,7 @@ var board = require('./board');
 module.exports = function(controller) {
 
   return {
-    set: controller.set,
+    set: controller.reconfigure,
     toggleOrientation: controller.toggleOrientation,
     getOrientation: function () {
       return controller.data.orientation;
