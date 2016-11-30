@@ -33,7 +33,7 @@ function computePlan(prev, current) {
     height = bounds.height / 8,
     anims = {},
     animedOrigs = [],
-    capturedPieces = {},
+    capturedPieces = [],
     missings = [],
     news = [],
     invert = prev.orientation !== current.orientation,
@@ -74,10 +74,10 @@ function computePlan(prev, current) {
   });
   missings.forEach(function(p) {
     if (p.key !== current.movable.dropped[0] && !util.containsX(animedOrigs, p.key)) {
-      capturedPieces[p.key] = {
-        role: p.role,
-        color: p.color
-      };
+      capturedPieces.push({
+        piece: p,
+        opacity: 1
+      });
     }
   });
 

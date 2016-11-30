@@ -142,9 +142,9 @@ function renderContent(ctrl) {
     transformProp: util.transformProp()
   };
   var children = renderSquares(ctrl, ctx);
-  if (d.animation.current.fadings) {
-    d.animation.current.fadings.forEach(function(p) {
-      children.push(renderFading(p, ctx));
+  if (d.animation.current.capturedPieces) {
+    d.animation.current.capturedPieces.forEach(function(p) {
+      children.push(renderCaptured(p, ctx));
     });
   }
 
@@ -156,12 +156,10 @@ function renderContent(ctrl) {
   return children;
 }
 
-function renderFading(cfg, ctx) {
+function renderCaptured(cfg, ctx) {
   var attrs = {
     className: 'fading ' + pieceClass(cfg.piece),
-    style: {
-      opacity: cfg.opacity
-    }
+    style: {}
   };
   attrs.style[ctx.transformProp] = util.translate(util.posToTranslate(cfg.piece.pos, ctx.asWhite, ctx.bounds));
   return Vnode(
