@@ -1,13 +1,33 @@
 var files = 'abcdefgh'.split('');
 var ranks = [1, 2, 3, 4, 5, 6, 7, 8];
 var invRanks = [8, 7, 6, 5, 4, 3, 2, 1];
+var fileNumbers = {
+  a: 1,
+  b: 2,
+  c: 3,
+  d: 4,
+  e: 5,
+  f: 6,
+  g: 7,
+  h: 8
+};
+var rankNumbers = {
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8
+};
 
 function pos2key(pos) {
   return files[pos[0] - 1] + pos[1];
 }
 
-function key2pos(pos) {
-  return [(files.indexOf(pos[0]) + 1), parseInt(pos[1])];
+function key2pos(key) {
+  return [fileNumbers[key[0]], rankNumbers[key[1]]];
 }
 
 function boardpos(pos, asWhite) {
@@ -18,7 +38,7 @@ function boardpos(pos, asWhite) {
 }
 
 function invertKey(key) {
-  return files[7 - files.indexOf(key[0])] + (9 - parseInt(key[1]));
+  return files[8 - fileNumbers[key[0]]] + (9 - rankNumbers[key[1]]);
 }
 
 var allPos = (function() {
