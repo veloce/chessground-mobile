@@ -54,11 +54,12 @@ var invPos = allPos.slice().reverse();
 var allKeys = allPos.map(pos2key);
 
 function classSet(classes) {
-  var arr = [];
-  for (var i in classes) {
-    if (classes[i]) arr.push(i);
+  var c = '';
+  var keys = Object.keys(classes);
+  for (var i = 0, len = keys.length; i < len; i++) {
+    if (classes[keys[i]]) c += ' ' + keys[i];
   }
-  return arr.join(' ');
+  return c;
 }
 
 function opposite(color) {
