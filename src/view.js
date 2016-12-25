@@ -151,11 +151,13 @@ function renderPiece(ctrl, key, p) {
     cgRole: p.role,
     cgColor: p.color,
     oncreate: function(vnode) {
-      var el = vnode.dom;
-      el.cgRole = p.role;
-      el.cgColor = p.color;
-      if (dragging) p.cgDragging = true;
-      else if (animation) p.cgAnimating = true;
+      if (!ctrl.data.minimalDom) {
+        var el = vnode.dom;
+        el.cgRole = p.role;
+        el.cgColor = p.color;
+        if (dragging) p.cgDragging = true;
+        else if (animation) p.cgAnimating = true;
+      }
     }
   };
   if (dragging) {
@@ -256,12 +258,11 @@ function renderMinimalDom(ctrl, asWhite) {
   var children = [];
   if (ctrl.data.lastMove) ctrl.data.lastMove.forEach(function(key) {
     var pos = util.key2pos(key);
-    var bpos = util.boardpos(pos, asWhite);
+    var t = posToTranslate(pos, asWhite, ctrl.data.bounds)
     var attrs = {
       className: 'last-move',
       style: {
-        left: bpos.left + '%',
-        bottom: bpos.bottom + '%'
+        transform: 'translate(' + t[0] + 'px,' + t[1] + 'px)'
       }
     };
     var node = Vnode('square', null, attrs, undefined, undefined, undefined);
@@ -272,11 +273,9 @@ function renderMinimalDom(ctrl, asWhite) {
     var key = piecesKeys[i];
     var pos = util.key2pos(key);
     var bpos = util.boardpos(pos, asWhite);
+    var t = posToTranslate(pos, asWhite, ctrl.data.bounds)
     var attrs = {
-      style: {
-        left: bpos.left + '%',
-        bottom: bpos.bottom + '%'
-      },
+      style: { transform: 'translate(' + t[0] + 'px,' + t[1] + 'px)' },
       className: pieceClass(ctrl.data.pieces[key])
     };
     children.push({
