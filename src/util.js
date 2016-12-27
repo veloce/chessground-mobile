@@ -37,6 +37,12 @@ function boardpos(pos, asWhite) {
   };
 }
 
+function posToTranslate(pos, asWhite, bounds) {
+  return [
+    (asWhite ? pos[0] - 1 : 8 - pos[0]) * bounds.width / 8, (asWhite ? 8 - pos[1] : pos[1] - 1) * bounds.height / 8
+  ];
+}
+
 function invertKey(key) {
   return files[8 - fileNumbers[key[0]]] + (9 - rankNumbers[key[1]]);
 }
@@ -142,6 +148,7 @@ module.exports = {
   pos2key: pos2key,
   key2pos: key2pos,
   boardpos: boardpos,
+  posToTranslate: posToTranslate,
   invertKey: invertKey,
   classSet: classSet,
   opposite: opposite,

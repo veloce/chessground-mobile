@@ -258,7 +258,7 @@ function renderMinimalDom(ctrl, asWhite) {
   var children = [];
   if (ctrl.data.lastMove) ctrl.data.lastMove.forEach(function(key) {
     var pos = util.key2pos(key);
-    var t = posToTranslate(pos, asWhite, ctrl.data.bounds)
+    var t = util.posToTranslate(pos, asWhite, ctrl.data.bounds)
     var attrs = {
       className: 'last-move',
       style: {
@@ -273,7 +273,7 @@ function renderMinimalDom(ctrl, asWhite) {
     var key = piecesKeys[i];
     var pos = util.key2pos(key);
     var bpos = util.boardpos(pos, asWhite);
-    var t = posToTranslate(pos, asWhite, ctrl.data.bounds)
+    var t = util.posToTranslate(pos, asWhite, ctrl.data.bounds)
     var attrs = {
       style: { transform: 'translate(' + t[0] + 'px,' + t[1] + 'px)' },
       className: pieceClass(ctrl.data.pieces[key])
