@@ -278,10 +278,14 @@ function renderMinimalDom(ctrl, asWhite) {
       style: { transform: 'translate(' + t[0] + 'px,' + t[1] + 'px)' },
       className: pieceClass(ctrl.data.pieces[key])
     };
-    children.push({
-      tag: 'piece',
-      attrs: attrs
-    });
+    children.push(Vnode(
+      'piece',
+      null,
+      attrs,
+      undefined,
+      undefined,
+      undefined
+    ));
   }
 
   return children;
