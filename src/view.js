@@ -6,7 +6,7 @@ var Vnode = require('mithril/render/vnode');
 module.exports = function renderBoard(ctrl) {
   return Vnode(
     'div',
-    null,
+    undefined,
     {
       className: [
         'cg-board orientation-' + ctrl.data.orientation,
@@ -41,9 +41,7 @@ module.exports = function renderBoard(ctrl) {
           }
         };
         ctrl.data.renderRAF = function() {
-          if (!ctrl.data.scheduledAnimationFrame) {
-            ctrl.data.scheduledAnimationFrame = requestAnimationFrame(ctrl.data.render);
-          }
+          ctrl.data.batchRAF(ctrl.data.render)
         };
 
         bindEvents(ctrl, el);
@@ -170,7 +168,7 @@ function renderPiece(ctrl, key, p) {
   else if (animation) attrs.style[util.transformProp()] = util.translate(animation[1]);
   return Vnode(
     'piece',
-    null,
+    undefined,
     attrs,
     undefined,
     undefined,
@@ -265,7 +263,7 @@ function renderMinimalDom(ctrl, asWhite) {
         transform: 'translate(' + t[0] + 'px,' + t[1] + 'px)'
       }
     };
-    var node = Vnode('square', null, attrs, undefined, undefined, undefined);
+    var node = Vnode('square', undefined, attrs, undefined, undefined, undefined);
     children.push(node);
   });
   var piecesKeys = Object.keys(ctrl.data.pieces);
@@ -280,7 +278,7 @@ function renderMinimalDom(ctrl, asWhite) {
     };
     children.push(Vnode(
       'piece',
-      null,
+      undefined,
       attrs,
       undefined,
       undefined,
