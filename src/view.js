@@ -123,7 +123,7 @@ function renderSquare(key, classes, ctx) {
   attrs.style.transform = util.translate(util.posToTranslate(util.key2pos(key), ctx.asWhite, ctx.bounds));
   return Vnode(
     'square',
-    undefined,
+    's' + key,
     attrs,
     undefined,
     undefined,

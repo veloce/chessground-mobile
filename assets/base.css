@@ -16,7 +16,6 @@
   position: relative;
   width: 100%;
   height: 100%;
-  z-index: 2;
 }
 square {
   position: absolute;
@@ -70,7 +69,6 @@ square.current-premove {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 50%;
-  will-change: transform;
 }
 piece {
   position: absolute;
@@ -79,12 +77,12 @@ piece {
   width: 12.5%;
   height: 12.5%;
   background-size: cover;
-  z-index: 3;
+  z-index: 2;
 }
-piece.dragging {
-  z-index: 9;
+piece.captured {
+  z-index: 1;
 }
-piece.dragging.magnified {
+piece.magnified {
   width: 25%;
   height: 25%;
 }
