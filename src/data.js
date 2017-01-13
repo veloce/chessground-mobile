@@ -11,7 +11,7 @@ module.exports = function(cfg) {
     selected: null, // square currently selected "a1" | null
     coordinates: true, // include coords attributes
     symmetricCoordinates: false, // include symmetric coords attributes for otb
-    batchRAF: requestAnimationFrame, // function to batch raf calls (use rAF by default)
+    batchRAF: requestAnimationFrame.bind(window), // function to batch raf calls (use rAF by default)
     render: null, // function that rerenders the board
     renderRAF: null, // function that rerenders the board using requestAnimationFrame
     element: null, // DOM element of the board, required for drag piece centering
