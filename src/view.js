@@ -6,7 +6,7 @@ var Vnode = require('mithril/render/vnode');
 module.exports = function renderBoard(ctrl) {
   return Vnode(
     'div',
-    null,
+    undefined,
     {
       className: [
         'cg-board orientation-' + ctrl.data.orientation,
@@ -25,9 +25,7 @@ module.exports = function renderBoard(ctrl) {
           m.render(vnode.dom, renderContent(ctrl));
         };
         ctrl.data.renderRAF = function() {
-          if (!ctrl.data.scheduledAnimationFrame) {
-            ctrl.data.scheduledAnimationFrame = requestAnimationFrame(ctrl.data.render);
-          }
+          ctrl.data.batchRAF(ctrl.data.render)
         };
 
         bindEvents(ctrl, vnode.dom);

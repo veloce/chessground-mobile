@@ -108,7 +108,7 @@ function step(data) {
       cfg[1] = [roundBy(cfg[0][0] * ease, 10), roundBy(cfg[0][1] * ease, 10)];
     }
     data.render();
-    data.scheduledAnimationFrame = requestAnimationFrame(function() { return step(data); });
+    data.batchRAF(function() { return step(data); });
   }
 }
 
@@ -138,7 +138,7 @@ function animate(transformation, data) {
       capturedPieces: plan.capturedPieces,
       animating: {}
     };
-    if (!alreadyRunning) data.scheduledAnimationFrame = requestAnimationFrame(function() { return step(data); });
+    if (!alreadyRunning) data.batchRAF(function() { return step(data); });
   } else {
     data.renderRAF();
   }
