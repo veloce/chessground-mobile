@@ -84,22 +84,6 @@ function distance(pos1, pos2) {
   return Math.sqrt(Math.pow(pos1[0] - pos2[0], 2) + Math.pow(pos1[1] - pos2[1], 2));
 }
 
-// this must be cached because of the access to document.body.style
-var cachedTransformProp;
-
-function computeTransformProp() {
-  return 'transform' in document.body.style ?
-    'transform' : 'webkitTransform' in document.body.style ?
-    'webkitTransform' : 'mozTransform' in document.body.style ?
-    'mozTransform' : 'oTransform' in document.body.style ?
-    'oTransform' : 'msTransform';
-}
-
-function transformProp() {
-  if (!cachedTransformProp) cachedTransformProp = computeTransformProp();
-  return cachedTransformProp;
-}
-
 function translate(pos) {
   return 'translate(' + pos[0] + 'px,' + pos[1] + 'px)';
 }
@@ -138,12 +122,6 @@ function computeSquareBounds(orientation, bounds, key) {
   };
 }
 
-function posToTranslate(pos, asWhite, bounds) {
-  return [
-    (asWhite ? pos[0] - 1 : 8 - pos[0]) * bounds.width / 8, (asWhite ? 8 - pos[1] : pos[1] - 1) * bounds.height / 8
-  ];
-}
-
 module.exports = {
   files: files,
   ranks: ranks,
@@ -155,7 +133,6 @@ module.exports = {
   key2pos: key2pos,
   posToTranslate: posToTranslate,
   boardpos: boardpos,
-  posToTranslate: posToTranslate,
   invertKey: invertKey,
   classSet: classSet,
   opposite: opposite,
@@ -166,7 +143,6 @@ module.exports = {
   eventPosition: eventPosition,
   partialApply: partialApply,
   partial: partial,
-  transformProp: transformProp,
   isRightButton: isRightButton,
   computeSquareBounds: computeSquareBounds
 };

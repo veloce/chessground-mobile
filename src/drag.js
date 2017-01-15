@@ -32,9 +32,12 @@ function removeSquareTarget(data) {
 }
 
 function undoDomChanges(data) {
-  if (data.draggable.current.draggingPiece) {
-    data.draggable.current.draggingPiece.classList.remove('dragging');
-    data.draggable.current.draggingPiece.classList.remove('magnified');
+  var cur = data.draggable.current;
+  if (cur.draggingPiece) {
+    var translate = util.posToTranslate(cur.origPos, data.orientation === 'white', data.bounds);
+    cur.draggingPiece.style.transform = util.translate(translate);
+    cur.draggingPiece.classList.remove('dragging');
+    cur.draggingPiece.classList.remove('magnified');
   }
 }
 
