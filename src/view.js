@@ -231,7 +231,7 @@ function renderPiece(d, key, ctx) {
   attrs.style.transform = util.translate(translate);
   return Vnode(
     'piece',
-    's' + key,
+    'p' + key,
     attrs,
     undefined,
     undefined,
