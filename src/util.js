@@ -88,6 +88,10 @@ function translate(pos) {
   return 'translate(' + pos[0] + 'px,' + pos[1] + 'px)';
 }
 
+function translate3d(pos) {
+  return 'translate3d(' + pos[0] + 'px,' + pos[1] + 'px, 0)';
+}
+
 function eventPosition(e) {
   return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
 }
@@ -137,6 +141,7 @@ module.exports = {
   classSet: classSet,
   opposite: opposite,
   translate: translate,
+  translate3d: translate3d,
   contains2: contains2,
   containsX: containsX,
   distance: distance,
