@@ -55,20 +55,21 @@ function diffBoard(ctrl) {
     pieceAtKey = pieces[k];
     id = pEl.cgRole + pEl.cgColor;
     anim = anims && anims[k];
-    captured = capturedPieces && capturedPieces.find(p => p.piece.key === k);
-    // animate
-    if (anim && pEl.cgAnimating) {
-      translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
-      translate[0] += anim[1][0];
-      translate[1] += anim[1][1];
-      pEl.style.transform = util.translate(translate);
-    } else if (pEl.cgAnimating) {
-      translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
-      pEl.style.transform = util.translate(translate);
-      pEl.cgAnimating = false;
-    }
+    captured = capturedPieces && capturedPieces[k];
     // there is a piece at this dom key
     if (pieceAtKey) {
+      // continue animation if flag and same piece color
+      // (otherwise it would animate a captured piece)
+      if (anim && pEl.cgAnimating && pEl.cgColor === pieceAtKey.color) {
+        translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
+        translate[0] += anim[1][0];
+        translate[1] += anim[1][1];
+        pEl.style.transform = util.translate(translate);
+      } else if (pEl.cgAnimating) {
+        translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
+        pEl.style.transform = util.translate(translate);
+        pEl.cgAnimating = false;
+      }
       // same piece: flag as same
       if (pEl.cgColor === pieceAtKey.color && pEl.cgRole === pieceAtKey.role) {
         same.add(k);
@@ -175,7 +176,7 @@ function renderPiece(d, key, ctx) {
   attrs.style.transform = util.translate(translate);
   return Vnode(
     'piece',
-    undefined,
+    's' + key,
     attrs,
     undefined,
     undefined,
@@ -231,7 +232,7 @@ function renderSquare(key, classes, ctx) {
   attrs.style.transform = util.translate(util.posToTranslate(util.key2pos(key), ctx.asWhite, ctx.bounds));
   return Vnode(
     'square',
-    undefined,
+    's' + key,
     attrs,
     undefined,
     undefined,
@@ -248,8 +249,8 @@ function renderContent(ctrl) {
   };
   var children = renderSquares(ctrl, ctx);
   if (d.animation.current.capturedPieces) {
-    d.animation.current.capturedPieces.forEach(function(p) {
-      children.push(renderCaptured(p, ctx));
+    Object.keys(d.animation.current.capturedPieces).forEach(function(k) {
+      children.push(renderCaptured(d.animation.current.capturedPieces[k], ctx));
     });
   }
 

@@ -33,7 +33,7 @@ function computePlan(prev, current) {
     height = bounds.height / 8,
     anims = {},
     animedOrigs = [],
-    capturedPieces = [],
+    capturedPieces = {},
     missings = [],
     news = [],
     invert = prev.orientation !== current.orientation,
@@ -74,10 +74,7 @@ function computePlan(prev, current) {
   });
   missings.forEach(function(p) {
     if (p.key !== current.movable.dropped[0] && !util.containsX(animedOrigs, p.key)) {
-      capturedPieces.push({
-        piece: p,
-        opacity: 1
-      });
+      capturedPieces[p.key] = p;
     }
   });
 
@@ -129,7 +126,7 @@ function animate(transformation, data) {
   }
   var result = transformation();
   var plan = computePlan(prev, data);
-  if (Object.keys(plan.anims).length > 0 || plan.capturedPieces.length > 0) {
+  if (Object.keys(plan.anims).length > 0 || Object.keys(plan.capturedPieces).length > 0) {
     var alreadyRunning = data.animation.current.start;
     data.animation.current = {
       start: Date.now(),
