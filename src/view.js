@@ -144,8 +144,8 @@ function renderPieceDom(piece, key, vdom) {
   return p;
 }
 
-function pieceClass(p, key) {
-  return p.role + ' ' + p.color + ' p' + key;
+function pieceClass(p) {
+  return p.role + ' ' + p.color;
 }
 
 function renderPiece(d, key, ctx) {
@@ -158,7 +158,7 @@ function renderPiece(d, key, ctx) {
   var dragging = draggable.orig === key && draggable.started;
   var attrs = {
     style: {},
-    className: pieceClass(p, key)
+    className: pieceClass(p)
   };
   var translate = util.posToTranslate(util.key2pos(key), ctx.asWhite, ctx.bounds);
   if (dragging) {

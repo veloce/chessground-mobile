@@ -31,6 +31,16 @@ function removeSquareTarget(data) {
   }
 }
 
+function getPieceByKey(data, key) {
+  var pieces = data.element.childNodes;
+  for (var i = 0, len = pieces.length; i < len; i++) {
+    var p = pieces[i];
+    if (p.cgKey === key) return p;
+  }
+
+  return null;
+}
+
 function undoDomChanges(data) {
   var cur = data.draggable.current;
   if (cur.draggingPiece) {
@@ -76,7 +86,7 @@ function start(data, e) {
       bounds: bounds,
       started: false,
       squareTarget: null,
-      draggingPiece: data.element.querySelector('.p' + orig),
+      draggingPiece: getPieceByKey(data, orig),
       originTarget: e.target,
       scheduledAnimationFrame: false
     };
