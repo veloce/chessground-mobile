@@ -123,7 +123,7 @@ function diffBoard(ctrl) {
           renderPieceDom(p, k, renderPiece(d, k, {
             asWhite: asWhite,
             bounds: bounds
-          }))
+          }), !!anim)
         );
       }
     }
@@ -135,12 +135,13 @@ function diffBoard(ctrl) {
   }
 }
 
-function renderPieceDom(piece, key, vdom) {
+function renderPieceDom(piece, key, vdom, isAnimating) {
   var p = document.createElement('piece');
   p.className = vdom.attrs.className;
   p.cgRole = piece.role;
   p.cgColor = piece.color;
   p.cgKey = key;
+  if (isAnimating) p.cgAnimating = true;
   p.style.transform = vdom.attrs.style.transform;
   return p;
 }
