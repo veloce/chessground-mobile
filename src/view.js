@@ -44,65 +44,85 @@ function diffBoard(ctrl) {
   var pieces = ctrl.data.pieces;
   var anims = ctrl.data.animation.current.anims;
   var capturedPieces = ctrl.data.animation.current.capturedPieces;
-  var same = new Set();
-  var moved = new Map();
-  var pEl, k, pieceAtKey, id, anim, captured, translate;
+  var squares = computeSquareMap(ctrl);
+  var samePieces = new Set();
+  var movedPieces = new Map();
+  var movedSquares = new Map();
+  var sameSquares = new Set();
+  var piecesKeys = Object.keys(pieces);
+  var el, k, squareAtKey, pieceAtKey, pieceId, anim, captured, translate;
+  var kv, v, p, mvdset, mvd;
 
   // walk over all dom elements, apply animations and flag moved pieces
   for (var i = 0, len = els.length; i < len; i++) {
-    pEl = els[i];
-    k = pEl.cgKey;
+    el = els[i];
+    k = el.cgKey;
     pieceAtKey = pieces[k];
-    id = pEl.cgRole + pEl.cgColor;
+    squareAtKey = squares.get(k);
+    pieceId = el.cgRole + el.cgColor;
     anim = anims && anims[k];
     captured = capturedPieces && capturedPieces[k];
-    // there is a piece at this dom key
-    if (pieceAtKey) {
-      // continue animation if flag and same piece color
-      // (otherwise it would animate a captured piece)
-      if (anim && pEl.cgAnimating && pEl.cgColor === pieceAtKey.color) {
-        translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
-        translate[0] += anim[1][0];
-        translate[1] += anim[1][1];
-        pEl.style.transform = util.translate(translate);
-      } else if (pEl.cgAnimating) {
-        translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
-        pEl.style.transform = util.translate(translate);
-        pEl.cgAnimating = false;
-      }
-      // same piece: flag as same
-      if (pEl.cgColor === pieceAtKey.color && pEl.cgRole === pieceAtKey.role) {
-        same.add(k);
-      }
-      // different piece: flag as moved unless it is a captured piece
-      else {
-        if (captured) {
-          pEl.classList.add('captured');
-        } else {
-          moved.set(id, pEl);
+    // el is a piece
+    if (el.cgRole) {
+      // there is a piece at this dom key
+      if (pieceAtKey) {
+        // continue animation if flag and same piece color
+        // (otherwise it would animate a captured piece)
+        if (anim && el.cgAnimating && el.cgColor === pieceAtKey.color) {
+          translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
+          translate[0] += anim[1][0];
+          translate[1] += anim[1][1];
+          el.style.transform = util.translate(translate);
+        } else if (el.cgAnimating) {
+          translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
+          el.style.transform = util.translate(translate);
+          el.cgAnimating = false;
+        }
+        // same piece: flag as same
+        if (el.cgColor === pieceAtKey.color && el.cgRole === pieceAtKey.role) {
+          samePieces.add(k);
+        }
+        // different piece: flag as moved unless it is a captured piece
+        else {
+          if (captured) {
+            el.classList.add('captured');
+          } else {
+            movedPieces.set(pieceId, (movedPieces.get(pieceId) || []).concat(el));
+          }
         }
       }
+      // no piece: flag as moved
+      else {
+        movedPieces.set(pieceId, (movedPieces.get(pieceId) || []).concat(el));
+      }
     }
-    // no piece: flag as moved
+    // el is a square
     else {
-      moved.set(id, pEl);
+      if (squareAtKey && squareAtKey === el.className) {
+        sameSquares.add(k);
+      }
+      else {
+        movedSquares.set(
+          el.className,
+          (movedSquares.get(el.className) || []).concat(el)
+        );
+      }
     }
   }
 
-  var piecesKeys = Object.keys(pieces);
-  var p;
   // walk over all pieces in current set, apply dom changes to moved pieces
   // or append new pieces
   for (var j = 0, jlen = piecesKeys.length; j < jlen; j++) {
     k = piecesKeys[j];
     p = pieces[k];
-    id = p.role + p.color;
+    pieceId = p.role + p.color;
     anim = anims && anims[k];
     // same piece: nothing to do
-    if (same.has(k)) {
+    if (samePieces.has(k)) {
       continue;
     } else {
-      var mvd = moved.get(id);
+      mvdset = movedPieces.get(pieceId);
+      mvd = mvdset && mvdset.pop();
       // a same piece was moved
       if (mvd) {
         // apply dom changes
@@ -114,8 +134,6 @@ function diffBoard(ctrl) {
           translate[1] += anim[1][1];
         }
         mvd.style.transform = util.translate(translate);
-        // remove flagged piece
-        moved.delete(id);
       }
       // no piece in moved obj: insert the new piece
       else {
@@ -129,9 +147,37 @@ function diffBoard(ctrl) {
     }
   }
 
-  // remove any dom el that remains in the moved set
-  for (var kv of moved) {
-    d.element.removeChild(kv[1]);
+  // walk over all squares in current set, apply dom changes to moved squares
+  // or append new squares
+  for (kv of squares) {
+    k = kv[0];
+    v = kv[1];
+    if (sameSquares.has(k)) continue;
+    else {
+      mvdset = movedSquares.get(v);
+      mvd = mvdset && mvdset.pop();
+      if (mvd) {
+        mvd.cgKey = k;
+        translate = util.posToTranslate(util.key2pos(k), asWhite, bounds);
+        mvd.style.transform = util.translate(translate);
+      }
+      else {
+        ctrl.data.element.appendChild(
+          renderSquareDom(k, renderSquare(k, v, {
+            asWhite: asWhite,
+            bounds: bounds
+          }))
+        );
+      }
+    }
+  }
+
+  // remove any dom el that remains in the moved sets
+  for (kv of movedPieces) {
+    kv[1].forEach(function(e) { d.element.removeChild(e); });
+  }
+  for (kv of movedSquares) {
+    kv[1].forEach(function(e) { d.element.removeChild(e); });
   }
 }
 
@@ -144,6 +190,14 @@ function renderPieceDom(piece, key, vdom, isAnimating) {
   if (isAnimating) p.cgAnimating = true;
   p.style.transform = vdom.attrs.style.transform;
   return p;
+}
+
+function renderSquareDom(key, vdom) {
+  var s = document.createElement('square');
+  s.className = vdom.attrs.className;
+  s.cgKey = key;
+  s.style.transform = vdom.attrs.style.transform;
+  return s;
 }
 
 function pieceClass(p) {
@@ -186,13 +240,12 @@ function renderPiece(d, key, ctx) {
 }
 
 function addSquare(squares, key, klass) {
-  if (squares[key]) squares[key].push(klass);
-  else squares[key] = [klass];
+  squares.set(key, (squares.get(key) || '') + ' ' + klass);
 }
 
-function renderSquares(ctrl, ctx) {
+function computeSquareMap(ctrl) {
   var d = ctrl.data;
-  var squares = {};
+  var squares = new Map();
   if (d.lastMove && d.highlight.lastMove) d.lastMove.forEach(function(k) {
     addSquare(squares, k, 'last-move');
   });
@@ -218,10 +271,16 @@ function renderSquares(ctrl, ctx) {
   if (ctrl.vm.exploding) ctrl.vm.exploding.keys.forEach(function(k) {
     addSquare(squares, k, 'exploding' + ctrl.vm.exploding.stage);
   });
+  return squares;
+}
+
+function renderSquares(ctrl, ctx) {
+  var squares = computeSquareMap(ctrl);
 
   var dom = [];
-  for (var skey in squares)
-    dom.push(renderSquare(skey, squares[skey].join(' '), ctx));
+  for (var kv of squares)
+    dom.push(renderSquare(kv[0], kv[1], ctx));
+
   return dom;
 }
 
